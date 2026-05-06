@@ -8,7 +8,6 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Status: Research Prototype](https://img.shields.io/badge/status-research%20prototype-orange.svg)]()
 [![Data: Synthetic Only](https://img.shields.io/badge/data-synthetic%20only-lightgrey.svg)]()
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20059956.svg)](https://doi.org/10.5281/zenodo.20059956)
 
 **This repository is a technical demonstrator of the DogGraph architecture using synthetic data. It is designed for behavioral informatics research and does not provide veterinary clinical diagnosis.**
 
@@ -68,7 +67,7 @@ Three connected ideas, each as a runnable notebook:
 ## Quickstart
 
 ```bash
-git clone https://github.com/labs-barkley/barkley-canine-cognition-lab.git
+git clone https://github.com/<your-handle>/barkley-canine-cognition-lab.git
 cd barkley-canine-cognition-lab
 pip install -r requirements.txt
 jupyter notebook notebooks/
@@ -162,6 +161,8 @@ This repository uses a **dual-license structure**.
 - **Barkley names, marks, logos, and brand assets** are not licensed for reuse. All trademark rights reserved.
 
 Full overview: [`LICENSE.md`](LICENSE.md). For commercial licensing inquiries: **labs@getbarkley.com**.
+
+> Patent applications pending (INPI, France · PCT international). All architectural methods, system components, and signal processing primitives described herein may be subject to intellectual property protection.
 
 ---
 
