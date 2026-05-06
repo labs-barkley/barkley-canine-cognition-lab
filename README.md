@@ -8,6 +8,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Status: Research Prototype](https://img.shields.io/badge/status-research%20prototype-orange.svg)]()
 [![Data: Synthetic Only](https://img.shields.io/badge/data-synthetic%20only-lightgrey.svg)]()
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20059956.svg)](https://doi.org/10.5281/zenodo.20059956)
 
 **This repository is a technical demonstrator of the DogGraph architecture using synthetic data. It is designed for behavioral informatics research and does not provide veterinary clinical diagnosis.**
 
