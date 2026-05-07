@@ -8,6 +8,8 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Status: Research Prototype](https://img.shields.io/badge/status-research%20prototype-orange.svg)]()
 [![Data: Synthetic Only](https://img.shields.io/badge/data-synthetic%20only-lightgrey.svg)]()
+[![Repo DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20059956.svg)](https://doi.org/10.5281/zenodo.20059956)
+[![Paper DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20060326.svg)](https://doi.org/10.5281/zenodo.20060326)
 
 **This repository is a technical demonstrator of the DogGraph architecture using synthetic data. It is designed for behavioral informatics research and does not provide veterinary clinical diagnosis.**
 
@@ -67,7 +69,7 @@ Three connected ideas, each as a runnable notebook:
 ## Quickstart
 
 ```bash
-git clone https://github.com/<your-handle>/barkley-canine-cognition-lab.git
+git clone https://github.com/labs-barkley/barkley-canine-cognition-lab.git
 cd barkley-canine-cognition-lab
 pip install -r requirements.txt
 jupyter notebook notebooks/
@@ -130,11 +132,21 @@ This repository contains **no personal data** about dogs or their owners. The sy
 
 ---
 
+## Publications & Citation
+
+**Framework Paper** — the primary scientific reference for this repository:
+
+> Remoissenet, E. P. (2026). *From Surveillance to Cognition: A Unified Framework for Precision Behavioral and Metabolic Intelligence in Companion Animals*. Barkley AI — Precision Behavioral Intelligence Series. DOI: [10.5281/zenodo.20060326](https://doi.org/10.5281/zenodo.20060326)
+
+**This repository** (code + notebooks + synthetic data):
+
+> Remoissenet, E. P. (2026). *Barkley Canine Cognition Lab — Research framework and technical demonstrator for individual-centric canine behavioral modeling*. Zenodo. DOI: [10.5281/zenodo.20059956](https://doi.org/10.5281/zenodo.20059956)
+
+---
+
 ## Next Milestone — Real-World Data Partner
 
 This repository establishes the conceptual and technical foundations of the Barkley framework on synthetic data. The next milestone is a **research collaboration with a real-world canine behavioral data partner** — a veterinary informatics lab, an academic cohort study, an insurance partner with longitudinal claims data, or a sensor company with consented user data.
-
-The goal of that collaboration: empirically validate the individual baseline methodology, calibrate drift detection thresholds against observed behavioral endpoints, and operationalize the Missing Data Paradox taxonomy on real data streams.
 
 If your organization has access to longitudinal canine behavioral data and is interested in a research partnership, please reach out.
 
