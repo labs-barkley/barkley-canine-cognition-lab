@@ -1,0 +1,21 @@
+{
+  "name": "barkley-drift-explorer",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Front-end-only demonstrator: a dog can remain normal for its breed while drifting from its own individual baseline.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.0"
+  }
+}
