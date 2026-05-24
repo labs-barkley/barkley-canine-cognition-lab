@@ -17,6 +17,19 @@
 
 ---
 
+## Public Research Artifacts
+
+This repository is the main public hub for the Barkley Canine Cognition Lab. It connects the framework, synthetic dataset, interactive demonstrator, and reference implementation.
+
+| Artifact | Role |
+|---|---|
+| [Drift Explorer](https://drift-explorer.getbarkley.com) | Interactive product demonstrator showing how individual baselines reveal hidden behavioral drift |
+| [Synthetic DogGraph Dataset](https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample) | Public synthetic data artifact for longitudinal canine behavioral trajectories |
+| [Barkley Reference Architecture](https://github.com/labs-barkley/barkley-reference-architecture) | Source-available computational backbone — runnable research demonstrator |
+| [Framework Paper](https://zenodo.org/records/20060327) | Conceptual foundation — DOI: [10.5281/zenodo.20060327](https://doi.org/10.5281/zenodo.20060327) |
+
+---
+
 ## The One Figure to Understand Barkley
 
 ![A dog can remain within breed-level norms while drifting away from its own longitudinal baseline](figures/single_dog_case_study.png)
@@ -136,7 +149,7 @@ This repository contains **no personal data** about dogs or their owners. The sy
 
 **Framework Paper** — the primary scientific reference for this repository:
 
-> Remoissenet, E. P. (2026). *From Surveillance to Cognition: A Unified Framework for Precision Behavioral and Metabolic Intelligence in Companion Animals*. Barkley AI — Precision Behavioral Intelligence Series. DOI: [10.5281/zenodo.20060326](https://doi.org/10.5281/zenodo.20060326)
+> Remoissenet, E. P. (2026). *From Surveillance to Cognition: A Unified Framework for Precision Behavioral and Metabolic Intelligence in Companion Animals*. Barkley AI — Precision Behavioral Intelligence Series. DOI [10.5281/zenodo.20060327](https://doi.org/10.5281/zenodo.20060327)
 
 **This repository** (code + notebooks + synthetic data):
 
