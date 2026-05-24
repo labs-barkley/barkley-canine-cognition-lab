@@ -51,6 +51,9 @@
  * GitHub:
  * https://github.com/labs-barkley/barkley-canine-cognition-lab
  *
+ * Reference Architecture:
+ * https://github.com/labs-barkley/barkley-reference-architecture
+ *
  * Hugging Face Dataset:
  * https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample
  *
@@ -180,7 +183,6 @@ html{-webkit-font-smoothing:antialiased}body{background:#000}
 @keyframes glow   {0%,100%{box-shadow:0 0 20px rgba(201,123,255,.07)}50%{box-shadow:0 0 40px rgba(201,123,255,.2)}}
 @keyframes haloBreath {0%,100%{opacity:.52;transform:scale(1)}50%{opacity:.82;transform:scale(1.07)}}
 
-/* Reduced motion */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{
     animation-duration:.01ms!important;
@@ -189,24 +191,19 @@ html{-webkit-font-smoothing:antialiased}body{background:#000}
   }
 }
 
-/* Hover */
 .bde-ctrl:hover  {color:rgba(240,237,232,.72)!important;border-color:rgba(240,237,232,.22)!important}
 .bde-link:hover  {opacity:.8}
 .bde-ibtn:hover  {background:rgba(240,237,232,.1)!important}
 
-/* Keyboard focus — visible ring for non-mouse users */
 .bde-toggle:focus-visible,.bde-ctrl:focus-visible,.bde-link:focus-visible,.bde-ibtn:focus-visible{
   outline:2px solid rgba(123,159,255,.65);outline-offset:2px;
 }
 
-/* ── TOGGLE: the cognitive switch ── */
-/* Framing eyebrow */
 .bde-tg-eyebrow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;
   font-size:10px;font-family:'DM Mono','Courier New',monospace;letter-spacing:.08em;
   text-transform:uppercase;color:rgba(240,237,232,.3);margin:1.2rem 0 .7rem}
 .bde-tg-eyebrow b{color:rgba(240,237,232,.62);font-weight:500}
 
-/* The card itself: inactive = dimmed & flat; active = lit */
 .bde-toggle{position:relative;display:flex;flex-direction:column;gap:.55rem;
   padding:1.1rem 1.25rem;border-radius:14px;text-align:left;cursor:pointer;
   border:1px solid rgba(240,237,232,.08);background:transparent;opacity:.5;
@@ -223,7 +220,6 @@ html{-webkit-font-smoothing:antialiased}body{background:#000}
   border-color:rgba(201,123,255,.5);background:rgba(201,123,255,.06);
   box-shadow:0 0 0 1px rgba(201,123,255,.12),0 0 40px rgba(201,123,255,.15),0 6px 24px rgba(0,0,0,.35)}
 
-/* Head row: indicator dot + label + ACTIVE badge */
 .bde-tg-head{display:flex;align-items:center;gap:.5rem}
 .bde-tg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;
   background:rgba(240,237,232,.22);transition:background .4s,box-shadow .4s,transform .4s cubic-bezier(.34,1.4,.5,1)}
@@ -244,34 +240,28 @@ html{-webkit-font-smoothing:antialiased}body{background:#000}
 .bde-toggle[data-active="true"][data-frame="individual"] .bde-tg-state{
   opacity:1;transform:none;color:#c97bff;background:rgba(201,123,255,.14)}
 
-/* Verdict line: ghost when inactive, accent when active */
 .bde-tg-verdict{font-size:11.5px;font-family:'DM Mono','Courier New',monospace;
   line-height:1.45;color:rgba(240,237,232,.28);transition:color .4s}
 .bde-toggle[data-active="true"][data-frame="breed"] .bde-tg-verdict{color:rgba(240,237,232,.6)}
 .bde-toggle[data-active="true"][data-frame="individual"] .bde-tg-verdict{color:#c97bff}
 
-/* Layout */
 .bde-main{animation:fadeUp .45s ease}
 .bde-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-bottom:1rem}
 .bde-grid {display:grid;grid-template-columns:1fr 1fr;gap:.65rem;padding:0 0 1rem}
 .bde-legend{display:flex;gap:1rem;align-items:center}
 .bde-chart{height:272px}
 
-/* ── Chart panel: emotional temperature shift ── */
-/* Breed = neutral & calm. Individual = faint diagnostic pink edge. */
 .bde-chartwrap{transition:border-color .55s cubic-bezier(.4,0,.2,1),box-shadow .55s cubic-bezier(.4,0,.2,1)}
 .bde-chartwrap[data-frame="individual"]{
   border-color:rgba(201,123,255,.22)!important;
   box-shadow:0 0 36px rgba(201,123,255,.07);
 }
-/* One-time diagnostic scan sweep when entering Individual view */
 .bde-scan{position:absolute;top:0;bottom:0;left:0;width:38%;z-index:3;pointer-events:none;
   background:linear-gradient(90deg,transparent,rgba(201,123,255,.13),transparent);
   transform:translateX(-130%);
   animation:scanSweep .95s cubic-bezier(.33,0,.2,1) 1 forwards}
 @keyframes scanSweep{to{transform:translateX(330%)}}
 
-/* Context legend — horizontal scroll */
 .bde-ctx{display:flex;border:1px solid rgba(240,237,232,.08);border-radius:8px;
   overflow-x:auto;margin-bottom:1.4rem;background:rgba(240,237,232,.01);
   scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -279,13 +269,11 @@ html{-webkit-font-smoothing:antialiased}body{background:#000}
 .bde-ctx-item{display:flex;align-items:center;gap:.36rem;padding:.58rem .88rem;
   border-right:1px solid rgba(240,237,232,.08);flex-shrink:0}
 
-/* Mobile */
 @media(max-width:680px){
   .bde-cards{grid-template-columns:repeat(2,1fr)!important}
   .bde-grid {grid-template-columns:1fr!important}
   .bde-chart{height:230px!important}
   .bde-ps{display:none}
-  /* Keep the legend — but let it wrap below the chart title so line meaning is never lost */
   .bde-legend{flex-wrap:wrap;width:100%;gap:.45rem .9rem}
 }
 @media(max-width:380px){.bde-cards{grid-template-columns:1fr!important}}
@@ -316,7 +304,6 @@ function Intro({ onBegin }) {
       display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
       padding:"2rem",textAlign:"center",overflow:"hidden"}}>
 
-      {/* Barkley Halo — breathing animation (zoom + opacity) */}
       <div aria-hidden style={{
         position:"absolute", top:"50%", left:"50%",
         transform:"translate(-50%,-50%)", pointerEvents:"none",
@@ -582,8 +569,6 @@ export default function BarkleyDriftExplorer() {
           <div style={{display:"flex",alignItems:"center",gap:"0.65rem"}}>
             <div aria-hidden style={{width:7,height:7,borderRadius:"50%",
               background:C.teal,boxShadow:`0 0 10px ${C.teal}`,animation:"pulse 2.2s ease infinite"}}/>
-            {/* Logo SVG — served from getbarkley.com to avoid broken links on Vercel/external hosts.
-                Falls back to text wordmark if the host is briefly unreachable. */}
             <img
               src="https://getbarkley.com/images/Barkley_Logo.png"
               alt="Barkley AI"
@@ -622,7 +607,7 @@ export default function BarkleyDriftExplorer() {
           {/* PROFILE */}
           <ProfileBanner isBreed={isBreed}/>
 
-          {/* FRAMING — persistent, explicit usefulness (visible even if intro is skipped) */}
+          {/* FRAMING */}
           <p style={{
             fontSize:11.5, color:C.muted, fontFamily:SANS, lineHeight:1.55,
             padding:"0.9rem 0 0",
@@ -631,13 +616,12 @@ export default function BarkleyDriftExplorer() {
             <span style={{color:C.dim}}>This is why individual baselines matter.</span>
           </p>
 
-          {/* TOGGLE — the cognitive switch */}
+          {/* TOGGLE */}
           <div className="bde-tg-eyebrow">
             Same dog · same data — <b>switch the reference frame</b>
           </div>
           <div className="bde-grid" role="group" aria-label="Select comparison reference frame">
 
-            {/* Breed */}
             <button className="bde-toggle" data-frame="breed" data-active={isBreed}
               onClick={() => switchView("breed")} aria-pressed={isBreed}>
               <div className="bde-tg-head">
@@ -652,7 +636,6 @@ export default function BarkleyDriftExplorer() {
               </p>
             </button>
 
-            {/* Individual */}
             <button className="bde-toggle" data-frame="individual" data-active={!isBreed}
               onClick={() => switchView("individual")} aria-pressed={!isBreed}>
               <div className="bde-tg-head">
@@ -697,18 +680,14 @@ export default function BarkleyDriftExplorer() {
           <div className="bde-chartwrap" data-frame={view}
             style={{border:`1px solid ${C.line}`,borderRadius:12,background:C.s1,
             padding:"1.2rem .5rem .7rem",marginBottom:"1rem",position:"relative",overflow:"hidden"}}>
-            {/* Dot grid */}
             <div aria-hidden style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none",
               backgroundImage:"radial-gradient(circle,rgba(240,237,232,.036) 1px,transparent 1px)",
               backgroundSize:"32px 32px"}}/>
-            {/* Top vignette */}
             <div aria-hidden style={{position:"absolute",top:0,left:0,right:0,height:36,
               zIndex:1,pointerEvents:"none",
               background:"linear-gradient(to bottom,rgba(6,6,10,.9),transparent)"}}/>
-            {/* One-time diagnostic scan when entering Individual view (keyed → replays each switch) */}
             {!isBreed && <div key={`scan-${cardKey}`} className="bde-scan" aria-hidden/>}
 
-            {/* Chart header */}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
               padding:"0 1.3rem .85rem",position:"relative",zIndex:2,flexWrap:"wrap",gap:"0.5rem"}}>
               <span style={{fontSize:9.5,fontFamily:MONO,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted}}>
@@ -748,27 +727,22 @@ export default function BarkleyDriftExplorer() {
                     cursor={{stroke:"rgba(240,237,232,.07)",strokeDasharray:"4 4",strokeWidth:1}}
                     isAnimationActive={false}/>
 
-                  {/* Breed band — full & reassuring in breed view; recedes (but stays visible)
-                       in individual view so the dog reads as "inside the safe zone, yet falling". */}
                   <ReferenceArea y1={BREED_MU-BREED_SIG} y2={BREED_MU+BREED_SIG}
                     fill={isBreed?"rgba(240,237,232,.05)":"rgba(240,237,232,.022)"}
                     stroke={isBreed?"rgba(240,237,232,.1)":"rgba(240,237,232,.045)"}
                     strokeWidth={1} ifOverflow="extendDomain"/>
 
-                  {/* Silence */}
                   {SIL_SPANS.map((r,i)=>(
                     <ReferenceArea key={i} x1={r.x1} x2={r.x2}
                       fill="rgba(63,214,188,.07)" stroke="rgba(63,214,188,.22)" strokeWidth={1} ifOverflow="extendDomain"/>
                   ))}
 
-                  {/* Context events */}
                   {showCtx&&CTX_EVENTS.filter(e=>e.day<=animDays).map(ev=>(
                     <ReferenceLine key={ev.label} x={ev.day} stroke={ev.color}
                       strokeWidth={1} strokeDasharray="3 5"
                       label={{value:ev.short,position:"insideTop",fill:ev.color,fontSize:11,fontFamily:MONO}}/>
                   ))}
 
-                  {/* Reference lines */}
                   {isBreed&&<ReferenceLine y={BREED_MU} stroke="rgba(240,237,232,.2)"
                     strokeDasharray="5 4" strokeWidth={1.5}
                     label={{value:`μ ${BREED_MU}`,position:"right",fill:C.muted,fontSize:9.5,fontFamily:MONO}}/>}
@@ -778,17 +752,13 @@ export default function BarkleyDriftExplorer() {
                   {!isBreed&&animDays>DRIFT_DAY&&<ReferenceLine x={DRIFT_DAY+1}
                     stroke="rgba(201,123,255,.2)" strokeWidth={1} strokeDasharray="2 4"/>}
 
-                  {/* Lines — glow layer + main line */}
                   {isBreed&&(<>
                     <Line dataKey="value" stroke="rgba(240,237,232,.09)" strokeWidth={5} dot={false} connectNulls={false} isAnimationActive={false}/>
                     <Line dataKey="value" stroke="rgba(240,237,232,.75)" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false}/>
                   </>)}
                   {!isBreed&&(<>
-                    {/* Stable period (blue): the calm "before" — already present, never animates */}
                     <Line dataKey="stableVal" stroke="rgba(123,159,255,.11)" strokeWidth={5} dot={false} connectNulls={false} isAnimationActive={false}/>
                     <Line dataKey="stableVal" stroke={C.blue} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false}/>
-                    {/* Drift period (pink): DRAWS ITSELF IN left→right on each switch to individual
-                         (keyed to cardKey). Static during replay so the day-by-day sim stays smooth. */}
                     <Line key={`drift-glow-${cardKey}`} dataKey="driftVal" stroke="rgba(201,123,255,.11)" strokeWidth={5}
                       dot={false} connectNulls={false}
                       isAnimationActive={!playing} animationDuration={900} animationEasing="ease-out"/>
@@ -800,7 +770,6 @@ export default function BarkleyDriftExplorer() {
               </ResponsiveContainer>
             </div>
 
-            {/* Progress */}
             {playing&&(
               <div aria-hidden style={{margin:"0.4rem 1.3rem 0",height:2,
                 background:"rgba(240,237,232,.06)",borderRadius:2,overflow:"hidden"}}>
@@ -810,7 +779,6 @@ export default function BarkleyDriftExplorer() {
               </div>
             )}
 
-            {/* Always-visible prototype label, tied to the visualization */}
             <p style={{
               padding:"0.7rem 1.3rem 0", fontSize:9, fontFamily:MONO,
               color:C.ghost, letterSpacing:"0.1em", textTransform:"uppercase",
@@ -867,7 +835,7 @@ export default function BarkleyDriftExplorer() {
             </div>
           )}
 
-          {/* CTA */}
+          {/* CTA FOOTER */}
           <footer style={{border:`1px solid ${C.line}`,borderRadius:12,padding:"2.2rem",
             background:C.s1,textAlign:"center",marginBottom:"2.5rem"}}>
             <p style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.15em",
@@ -887,10 +855,24 @@ export default function BarkleyDriftExplorer() {
               The infrastructure to understand one dog at a time.
             </p>
             <div style={{display:"flex",gap:"0.6rem",justifyContent:"center",flexWrap:"wrap"}}>
-              <CTALink href="https://github.com/labs-barkley/barkley-canine-cognition-lab"                                       variant="ghost"  >◎ View GitHub</CTALink>
-              <CTALink href="https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample/tree/main"                  variant="accent" >⬡ Explore Dataset</CTALink>
-              <CTALink href="https://tally.so/r/2EOgWe"                                                                         variant="primary">→ Join Waitlist</CTALink>
+              <CTALink href="https://github.com/labs-barkley/barkley-canine-cognition-lab"                              variant="ghost"  >◎ View GitHub</CTALink>
+              <CTALink href="https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample/tree/main"         variant="accent" >⬡ Explore Dataset</CTALink>
+              <CTALink href="https://tally.so/r/2EOgWe"                                                                variant="primary">→ Join Waitlist</CTALink>
             </div>
+
+            {/* Reference Architecture — link */}
+            <p style={{marginTop:"0.85rem",fontSize:10,fontFamily:MONO,color:C.ghost}}>
+              Explore the computational backbone →{" "}
+              <a
+                href="https://github.com/labs-barkley/barkley-reference-architecture"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{color:"rgba(123,159,255,.6)",textDecoration:"none"}}
+              >
+                Barkley Reference Architecture
+              </a>
+            </p>
+
             <p style={{marginTop:"1.2rem",fontSize:9.5,fontFamily:MONO,color:C.ghost}}>
               Not a diagnostic tool · Synthetic data only · Prototype visualization · © 2026 Barkley AI. All rights reserved.
             </p>
