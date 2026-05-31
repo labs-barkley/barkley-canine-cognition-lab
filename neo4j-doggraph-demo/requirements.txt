@@ -1,0 +1,3 @@
+# Barkley DogGraph demo — only needed for the natural-language query layer (ask.py).
+# The .cypher files need no Python at all; run them in Neo4j Browser / AuraDB.
+neo4j>=5.0
