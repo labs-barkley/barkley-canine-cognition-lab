@@ -121,6 +121,8 @@ This prototype operationalizes the framework:
 * ✍️ Medium — [Your dog can be normal for its breed and abnormal for itself](https://medium.com/@labs-barkley/your-dog-can-be-normal-for-its-breed-and-abnormal-for-itself-0a4c9a7b3f58)
 * 🆔 ORCID — https://orcid.org/0009-0004-6031-659X
 
+> Related: DogGraph can also be explored as a Neo4j property graph in [`../neo4j-doggraph-demo`](../neo4j-doggraph-demo).
+
 Built for the **HackerNoon "Proof of Usefulness" Tech \& AI Hackathon 2026**, by Elodie Aishwarya P. Remoissenet — Founder, Barkley AI.
 
 \---
