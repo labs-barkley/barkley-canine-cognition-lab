@@ -1,3 +1,15 @@
-# Barkley DogGraph demo — only needed for the natural-language query layer (ask.py).
-# The .cypher files need no Python at all; run them in Neo4j Browser / AuraDB.
+# Barkley DogGraph demo (v2) — Python dependencies.
+# The .cypher files need no Python at all; you can run schema.cypher and
+# seed_synthetic.cypher directly in Neo4j Browser / AuraDB.
+#
+# Everything below is for the optional Python layers:
+#   - ask.py / graph_query.py        → deterministic NL→Cypher router (needs only neo4j)
+#   - graph_query_llm.py             → schema-constrained LLM text-to-Cypher + GraphRAG
+#   - app.py                         → Streamlit UI over the graph
+#   - make_seed_render.py            → publication-quality PNG of the seeded subgraph
+
 neo4j>=5.0
+anthropic>=0.40.0
+streamlit>=1.30
+networkx>=3.0
+matplotlib>=3.7
