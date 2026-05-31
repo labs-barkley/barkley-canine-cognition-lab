@@ -27,9 +27,9 @@ This repository is the main public hub for the Barkley Canine Cognition Lab. It 
 | [Synthetic DogGraph Dataset](https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample) | Public synthetic data artifact for longitudinal canine behavioral trajectories |
 | [Barkley Reference Architecture](https://github.com/labs-barkley/barkley-reference-architecture) | Source-available computational backbone — runnable research demonstrator |
 | [Framework Paper](https://zenodo.org/records/20060327) | Conceptual foundation — DOI: [10.5281/zenodo.20060327](https://doi.org/10.5281/zenodo.20060327) |
+| [Neo4j DogGraph Demo](./neo4j-doggraph-demo) | Graph-native representation of DogGraph — Proof of Usefulness / Neo4j track |
 
 ---
-
 ## The One Figure to Understand Barkley
 
 ![A dog can remain within breed-level norms while drifting away from its own longitudinal baseline](figures/single_dog_case_study.png)
