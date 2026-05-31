@@ -354,11 +354,17 @@ def answer_llm(question: str, prefer_llm: bool = True) -> GraphAnswer:
     # ---------- Deterministic fallback ----------
     t = _det_translate(question)
     if t is None:
+        if _anthropic_available():
+            note = ("Deterministic router has no matching intent for this question. "
+                    "Switch the translator toggle to LLM (schema-constrained) for "
+                    "free-form questions.")
+        else:
+            note = ("Deterministic router has no matching intent. "
+                    "Set ANTHROPIC_API_KEY to enable the LLM translator.")
         return GraphAnswer(
             question=question, mode="deterministic", cypher="",
             rows=[], answer="",
-            note="Deterministic router has no matching intent. "
-                 "Set ANTHROPIC_API_KEY to enable the LLM translator.",
+            note=note,
         )
     cypher, params, intent, explain = t
     rows = run_cypher(cypher, params)

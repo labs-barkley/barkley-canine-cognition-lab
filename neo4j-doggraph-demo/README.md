@@ -4,6 +4,8 @@
 
 > Synthetic data · Research demonstrator · Not a diagnostic tool · Patent applications filed
 
+🔗 **Live app:** **[barkley-doggraph.streamlit.app](https://barkley-doggraph.streamlit.app/)** — the contents of this folder, deployed against a real AuraDB instance, with the LLM/GraphRAG layer enabled.
+
 **A focused Neo4j demo of Barkley's core idea: a dog's behavioral intelligence is
 fundamentally _relational_ — dog ↔ baseline ↔ context ↔ drift ↔ environment ↔
 compatible dogs — so it belongs in a graph, not a flat table of snapshots.**
