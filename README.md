@@ -112,6 +112,21 @@ barkley-canine-cognition-lab/
 
 ---
 
+## Canonical Definitions — Barkley Behavioral Intelligence Glossary
+
+These definitions are canonical across the Barkley ecosystem — this repository, [getbarkley.com](https://getbarkley.com/), the Zenodo records, and the machine-readable glossary ([llms.txt](https://getbarkley.com/llms.txt), JSON-LD `DefinedTermSet`). One concept, one definition, everywhere.
+
+- **Behavioral Intelligence** — The modeling of an individual's behavior over time to produce interpretable signals about wellbeing, capability, and change — built on longitudinal data rather than single observations.
+- **Behavioral Drift** — A slow, cumulative divergence of an individual's behavior away from its own baseline — typically invisible to population statistics because each step remains within the population's normal range.
+- **Individual Baseline** — A per-individual longitudinal norm learned from that individual's own history, used as the reference frame for detecting change instead of a population average.
+- **Reference Frame** — The comparison standard a model uses to decide whether a behavior is normal; the same data can yield opposite conclusions under different reference frames.
+- **Longitudinal Intelligence** — Intelligence derived from modeling a subject continuously across time — trajectories, velocities, and rates of change — rather than from snapshots.
+- **Reference Class** — The group an individual is compared against; the hidden variable of machine learning, because the choice of reference class changes what counts as anomalous.
+- **Weak Signals** — Small, early behavioral changes — reduced recovery, altered exploration, informative silences — that precede clinically obvious change.
+- **Behavioral Change Detection** — The task of detecting meaningful change in an individual's behavior as early as possible, benchmarked by lead time, recall, and false-alarm rate.
+
+---
+
 ## Scientific Grounding
 
 This framework draws on published research across three domains:
