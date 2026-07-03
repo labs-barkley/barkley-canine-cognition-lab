@@ -53,6 +53,9 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Soft per-session cap on questions (public demo wired to a real API key).
+MAX_QUESTIONS_PER_SESSION = 25
+
 
 # --------------------------------------------------------------------------- #
 # Secrets / env: read from Streamlit Cloud secrets first, fall back to env vars
@@ -188,7 +191,17 @@ if submit and question.strip():
             "`NEO4J_PASSWORD` in Streamlit secrets (cloud) or env vars (local). "
             "See README for the AuraDB setup steps."
         )
+    elif st.session_state.get("q_count", 0) >= MAX_QUESTIONS_PER_SESSION:
+        # Soft, per-session rate limit — mitigates casual abuse of a public
+        # demo wired to a real API key. A determined user can refresh; pair
+        # this with a spend alert on the Anthropic console.
+        st.warning(
+            f"You've reached {MAX_QUESTIONS_PER_SESSION} questions for this session — "
+            "thanks for exploring the DogGraph! Refresh the page to start a new "
+            "session, or reach out at labs@getbarkley.com to go deeper."
+        )
     else:
+        st.session_state["q_count"] = st.session_state.get("q_count", 0) + 1
         prefer_llm = (mode == "LLM (schema-constrained)")
         if prefer_llm and not llm_ok:
             st.info("ANTHROPIC_API_KEY missing — falling back to the deterministic router.")

