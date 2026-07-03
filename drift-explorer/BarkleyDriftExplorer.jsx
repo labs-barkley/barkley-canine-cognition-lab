@@ -196,6 +196,22 @@ html{-webkit-font-smoothing:antialiased}body{background:#06070a}
 }
 
 .bde-ctrl:hover  {border-color:rgba(237,235,228,.44)!important;background:rgba(255,255,255,.04)!important}
+
+/* ── burger + mobile menu (mirrors getbarkley.com v9) ── */
+.bde-burger{display:flex;flex-direction:column;gap:5px;width:34px;height:34px;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;flex-shrink:0}
+.bde-burger span{display:block;width:21px;height:1.6px;background:#edebe4;border-radius:2px;transition:transform .3s,opacity .3s}
+.bde-burger[data-open="true"] span:nth-child(1){transform:translateY(6.6px) rotate(45deg)}
+.bde-burger[data-open="true"] span:nth-child(2){opacity:0}
+.bde-burger[data-open="true"] span:nth-child(3){transform:translateY(-6.6px) rotate(-45deg)}
+.bde-mm{position:fixed;inset:0;z-index:1000;background:rgba(6,7,10,.94);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-start;gap:.85rem;
+  padding:6rem clamp(1.8rem,8vw,4.5rem) 3rem;text-align:right;overflow-y:auto;
+  opacity:0;pointer-events:none;transition:opacity .3s}
+.bde-mm[data-open="true"]{opacity:1;pointer-events:auto}
+.bde-mm a{font-family:'Inter Tight','Helvetica Neue',sans-serif;font-size:1.05rem;font-weight:500;color:rgba(237,235,228,.64);text-decoration:none;transition:color .2s}
+.bde-mm a:hover{color:#edebe4}
+.bde-mm .mm-close{position:absolute;top:1.5rem;right:clamp(1.8rem,8vw,4.5rem)}
+.bde-mm .mm-sub{align-self:flex-end;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(237,235,228,.25);margin-top:.9rem}
 .bde-link:hover  {opacity:.8}
 .bde-ibtn:hover  {background:rgba(237,235,228,.1)!important}
 
@@ -546,6 +562,43 @@ function LI({ color, label, type }) {
   );
 }
 
+// ─────────────────────────────────────────────
+//  MOBILE MENU  (getbarkley.com v9 — links open the site in a new tab)
+// ─────────────────────────────────────────────
+const SITE = "https://getbarkley.com";
+const MENU_LINKS = [
+  { label: "Thesis",         href: SITE + "/#thesis" },
+  { label: "Evidence",       href: SITE + "/#evidence" },
+  { label: "Intelligence",   href: SITE + "/#longitudinal" },
+  { label: "Architecture",   href: SITE + "/#architecture" },
+  { label: "Benchmark",      href: SITE + "/#benchmark" },
+  { label: "Research",       href: SITE + "/#research" },
+  { label: "Founder",        href: SITE + "/#founder" },
+  { label: "Publications",   href: SITE + "/#updates" },
+  { label: "Roadmap",        href: SITE + "/#roadmap" },
+  { label: "Contact",        href: SITE + "/#contact" },
+  { label: "getbarkley.com ↗", href: SITE + "/" },
+  { label: "GitHub ↗",       href: "https://github.com/labs-barkley/barkley-reference-architecture" },
+  { label: "Investor access", href: "mailto:invest@getbarkley.com" },
+];
+
+function MobileMenu({ open, onClose }) {
+  return (
+    <nav className="bde-mm" data-open={open} aria-hidden={!open}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <button className="bde-burger mm-close" data-open="true" onClick={onClose} aria-label="Close menu">
+        <span/><span/><span/>
+      </button>
+      {MENU_LINKS.map((l) => (
+        <a key={l.label} href={l.href}
+          target={l.href.startsWith("mailto:") ? undefined : "_blank"}
+          rel="noopener noreferrer" onClick={onClose}>{l.label}</a>
+      ))}
+      <div className="mm-sub">Barkley · 2026</div>
+    </nav>
+  );
+}
+
 function CtrlBtn({ children, onClick, disabled, active }) {
   /* v9 ghost pill — white, hairline border, same as the site's secondary buttons */
   return (
@@ -588,6 +641,7 @@ export default function BarkleyDriftExplorer() {
   const [playing,   setPlaying]   = useState(false);
   const [showCtx,   setShowCtx]   = useState(true);
   const [cardKey,   setCardKey]   = useState(0);
+  const [menuOpen,  setMenuOpen]  = useState(false);
 
   const isBreed = view === "breed";
   const data    = useMemo(() => DATA.slice(0, animDays), [animDays]);
@@ -608,6 +662,14 @@ export default function BarkleyDriftExplorer() {
     const t = setTimeout(() => setAnimDays(p => p + 1), ms);
     return () => clearTimeout(t);
   }, [playing, animDays]);
+
+  // close the mobile menu on Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
 
   // autoplay the 90-day record once, when the explorer opens
   const autoPlayed = useRef(false);
@@ -647,10 +709,17 @@ export default function BarkleyDriftExplorer() {
               Drift Explorer
             </span>
           </a>
-          <span style={{fontSize:9.5,color:C.ghost,fontFamily:MONO,letterSpacing:"0.14em",textTransform:"uppercase"}}>
-            Experimental Research Tool
-          </span>
+          <div style={{display:"flex",alignItems:"center",gap:"1.1rem"}}>
+            <span style={{fontSize:9.5,color:C.ghost,fontFamily:MONO,letterSpacing:"0.14em",textTransform:"uppercase"}}>
+              Experimental Research Tool
+            </span>
+            <button className="bde-burger" data-open={menuOpen} onClick={() => setMenuOpen(o => !o)}
+              aria-label="Menu" aria-expanded={menuOpen}>
+              <span/><span/><span/>
+            </button>
+          </div>
         </header>
+        <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)}/>
 
         <main style={{maxWidth:1120,margin:"0 auto",padding:"0 1.5rem",position:"relative",zIndex:1}}>
 
