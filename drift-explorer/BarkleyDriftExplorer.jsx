@@ -82,22 +82,26 @@ import {
 // ─────────────────────────────────────────────
 //  DESIGN TOKENS
 // ─────────────────────────────────────────────
+/* Barkley v9 design tokens — mirrors getbarkley.com */
 const C = {
-  bg:    "#000",
-  s1:    "#06060a",
-  white: "#f0ede8",
-  dim:   "rgba(240,237,232,.55)",
-  muted: "rgba(240,237,232,.38)",
-  ghost: "rgba(240,237,232,.18)",
-  line:  "rgba(240,237,232,.08)",
+  bg:    "#06070a",
+  s1:    "#0d0f14",
+  white: "#edebe4",
+  dim:   "rgba(237,235,228,.64)",
+  muted: "rgba(237,235,228,.42)",
+  ghost: "rgba(237,235,228,.25)",
+  line:  "rgba(237,235,228,.09)",
   blue:  "#7b9fff",
   pink:  "#c97bff",
   teal:  "#3fd6bc",
   amber: "#f5a623",
   red:   "#ff8a80",
 };
-const MONO = "'DM Mono','Courier New',monospace";
-const SANS = "'Plus Jakarta Sans','Helvetica Neue',sans-serif";
+const MONO  = "'JetBrains Mono',ui-monospace,monospace";
+const SANS  = "'Inter','Helvetica Neue',sans-serif";
+const DISP  = "'Inter Tight','Helvetica Neue',sans-serif";
+const SERIF = "'Instrument Serif',Georgia,serif";
+const GRAD  = "linear-gradient(120deg,#7b9fff,#c97bff)";
 
 const DOG = { name: "Kikoo", breed: "Jack Russell Terrier", age: "Adult" };
 
@@ -172,9 +176,9 @@ const INDIV_CARDS = [
 //  GLOBAL CSS
 // ─────────────────────────────────────────────
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-font-smoothing:antialiased}body{background:#000}
+html{-webkit-font-smoothing:antialiased}body{background:#06070a}
 
 @keyframes pulse  {0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.88)}}
 @keyframes spin   {to{transform:rotate(360deg)}}
@@ -191,30 +195,30 @@ html{-webkit-font-smoothing:antialiased}body{background:#000}
   }
 }
 
-.bde-ctrl:hover  {color:rgba(240,237,232,.72)!important;border-color:rgba(240,237,232,.22)!important}
+.bde-ctrl:hover  {border-color:rgba(237,235,228,.44)!important;background:rgba(255,255,255,.04)!important}
 .bde-link:hover  {opacity:.8}
-.bde-ibtn:hover  {background:rgba(240,237,232,.1)!important}
+.bde-ibtn:hover  {background:rgba(237,235,228,.1)!important}
 
 .bde-toggle:focus-visible,.bde-ctrl:focus-visible,.bde-link:focus-visible,.bde-ibtn:focus-visible{
   outline:2px solid rgba(123,159,255,.65);outline-offset:2px;
 }
 
 .bde-tg-eyebrow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;
-  font-size:10px;font-family:'DM Mono','Courier New',monospace;letter-spacing:.08em;
-  text-transform:uppercase;color:rgba(240,237,232,.3);margin:1.2rem 0 .7rem}
-.bde-tg-eyebrow b{color:rgba(240,237,232,.62);font-weight:500}
+  font-size:10px;font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:.08em;
+  text-transform:uppercase;color:rgba(237,235,228,.3);margin:1.2rem 0 .7rem}
+.bde-tg-eyebrow b{color:rgba(237,235,228,.62);font-weight:500}
 
 .bde-toggle{position:relative;display:flex;flex-direction:column;gap:.55rem;
   padding:1.1rem 1.25rem;border-radius:14px;text-align:left;cursor:pointer;
-  border:1px solid rgba(240,237,232,.08);background:transparent;opacity:.5;
+  border:1px solid rgba(237,235,228,.08);background:transparent;opacity:.5;
   transition:opacity .4s cubic-bezier(.4,0,.2,1),border-color .4s cubic-bezier(.4,0,.2,1),
              background .4s cubic-bezier(.4,0,.2,1),box-shadow .45s cubic-bezier(.4,0,.2,1),
              transform .35s cubic-bezier(.34,1.4,.5,1)}
 .bde-toggle[data-active="false"]:hover{opacity:.82;transform:translateY(-1px);
-  border-color:rgba(240,237,232,.18);background:rgba(240,237,232,.02)}
+  border-color:rgba(237,235,228,.18);background:rgba(237,235,228,.02)}
 .bde-toggle[data-active="true"]{opacity:1;transform:translateY(-2px) scale(1.008)}
 .bde-toggle[data-active="true"][data-frame="breed"]{
-  border-color:rgba(240,237,232,.34);background:rgba(240,237,232,.055);
+  border-color:rgba(237,235,228,.34);background:rgba(237,235,228,.055);
   box-shadow:0 6px 24px rgba(0,0,0,.35)}
 .bde-toggle[data-active="true"][data-frame="individual"]{
   border-color:rgba(201,123,255,.5);background:rgba(201,123,255,.06);
@@ -222,31 +226,76 @@ html{-webkit-font-smoothing:antialiased}body{background:#000}
 
 .bde-tg-head{display:flex;align-items:center;gap:.5rem}
 .bde-tg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;
-  background:rgba(240,237,232,.22);transition:background .4s,box-shadow .4s,transform .4s cubic-bezier(.34,1.4,.5,1)}
+  background:rgba(237,235,228,.22);transition:background .4s,box-shadow .4s,transform .4s cubic-bezier(.34,1.4,.5,1)}
 .bde-toggle[data-active="true"][data-frame="breed"] .bde-tg-dot{
-  background:rgba(240,237,232,.95);box-shadow:0 0 10px rgba(240,237,232,.5);transform:scale(1.25)}
+  background:rgba(237,235,228,.95);box-shadow:0 0 10px rgba(237,235,228,.5);transform:scale(1.25)}
 .bde-toggle[data-active="true"][data-frame="individual"] .bde-tg-dot{
   background:#c97bff;box-shadow:0 0 13px #c97bff;transform:scale(1.25);animation:pulse 2s ease infinite}
 
-.bde-tg-label{font-size:clamp(.95rem,2.2vw,1.08rem);font-weight:700;letter-spacing:-.02em;
-  color:rgba(240,237,232,.5);transition:color .4s}
-.bde-toggle[data-active="true"] .bde-tg-label{color:#f0ede8}
+.bde-tg-label{font-family:'Inter Tight','Helvetica Neue',sans-serif;font-size:clamp(.95rem,2.2vw,1.08rem);font-weight:600;letter-spacing:-.02em;
+  color:rgba(237,235,228,.5);transition:color .4s}
+.bde-toggle[data-active="true"] .bde-tg-label{color:#edebe4}
 
 .bde-tg-state{margin-left:auto;font-size:8px;letter-spacing:.16em;text-transform:uppercase;
-  font-family:'DM Mono','Courier New',monospace;padding:2px 7px;border-radius:5px;
+  font-family:'JetBrains Mono',ui-monospace,monospace;padding:2px 7px;border-radius:5px;
   opacity:0;transform:scale(.85);transition:opacity .4s .05s,transform .4s .05s}
 .bde-toggle[data-active="true"][data-frame="breed"] .bde-tg-state{
-  opacity:1;transform:none;color:rgba(240,237,232,.62);background:rgba(240,237,232,.09)}
+  opacity:1;transform:none;color:rgba(237,235,228,.62);background:rgba(237,235,228,.09)}
 .bde-toggle[data-active="true"][data-frame="individual"] .bde-tg-state{
   opacity:1;transform:none;color:#c97bff;background:rgba(201,123,255,.14)}
 
-.bde-tg-verdict{font-size:11.5px;font-family:'DM Mono','Courier New',monospace;
-  line-height:1.45;color:rgba(240,237,232,.28);transition:color .4s}
-.bde-toggle[data-active="true"][data-frame="breed"] .bde-tg-verdict{color:rgba(240,237,232,.6)}
+.bde-tg-verdict{font-size:11.5px;font-family:'JetBrains Mono',ui-monospace,monospace;
+  line-height:1.45;color:rgba(237,235,228,.28);transition:color .4s}
+.bde-toggle[data-active="true"][data-frame="breed"] .bde-tg-verdict{color:rgba(237,235,228,.6)}
 .bde-toggle[data-active="true"][data-frame="individual"] .bde-tg-verdict{color:#c97bff}
 
 .bde-main{animation:fadeUp .45s ease}
-.bde-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-bottom:1rem}
+
+/* ── jSite window (v6 GitHub section, v9 tokens) ── */
+.win{position:relative;border:1px solid rgba(237,235,228,.09);border-radius:16px;overflow:hidden;
+  background:#0b0d12;box-shadow:0 60px 140px -70px rgba(0,0,0,.95);margin:1.6rem 0 0}
+.win-bar{display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;background:#090b0f;
+  border-bottom:1px solid rgba(237,235,228,.05)}
+.win-dots{display:flex;gap:6px;flex-shrink:0}
+.win-dots i{width:11px;height:11px;border-radius:50%;display:block}
+.win-title{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.7rem;color:rgba(237,235,228,.42);
+  margin:0 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.win-title b{color:rgba(237,235,228,.64);font-weight:500}
+.win-actions{display:flex;gap:.45rem;align-items:center;flex-shrink:0}
+.win-body{padding:0 clamp(1rem,2.5vw,1.6rem)}
+.win-status{display:flex;align-items:center;gap:1.1rem;padding:.45rem 1rem;background:#090b0f;
+  border-top:1px solid rgba(237,235,228,.05);flex-wrap:wrap}
+.win-status span,.win-status a{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.64rem;
+  color:rgba(237,235,228,.42);text-decoration:none}
+.win-status .br{color:#7b9fff}.win-status .ok{color:#3fd6bc}
+.win-status a:hover{color:#edebe4}
+
+/* ── v9 segmented reference-frame control ── */
+.seg{display:inline-flex;border:1px solid rgba(237,235,228,.09);border-radius:999px;overflow:hidden;
+  background:rgba(255,255,255,.02);flex-shrink:0}
+.seg-btn{font-family:'Inter Tight','Helvetica Neue',sans-serif;font-size:.82rem;font-weight:600;
+  padding:.52rem 1.25rem;border:none;background:transparent;color:rgba(237,235,228,.42);
+  cursor:pointer;transition:color .25s,background .25s;white-space:nowrap}
+.seg-btn[data-on="true"]{color:#fff;background:linear-gradient(120deg,rgba(123,159,255,.92),rgba(201,123,255,.92))}
+.seg-btn[data-on="false"]:hover{color:#edebe4;background:rgba(255,255,255,.04)}
+.bde-verdict{font-family:'Instrument Serif',Georgia,serif;font-style:italic;
+  font-size:clamp(1rem,1.7vw,1.22rem);color:#edebe4;line-height:1.4;transition:opacity .4s}
+
+/* ── v9 dotted grid backdrop (épuré chart) ── */
+.dotgrid{position:relative}
+.dotgrid::before{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background-image:radial-gradient(rgba(237,235,228,.13) 1px,transparent 1px);background-size:22px 22px;
+  -webkit-mask-image:radial-gradient(ellipse 88% 88% at 50% 50%,#000,transparent);
+  mask-image:radial-gradient(ellipse 88% 88% at 50% 50%,#000,transparent)}
+.dotgrid>*{position:relative}
+
+/* ── v9 stat cells (hairline dividers + corner brackets) ── */
+.bde-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid rgba(237,235,228,.09);margin-bottom:1.4rem}
+.statcell{position:relative;padding:1.15rem 1.1rem 1.25rem;border-left:1px solid rgba(237,235,228,.09);
+  display:flex;flex-direction:column}
+.statcell:first-child{border-left:none;padding-left:.15rem}
+.statcell::after{content:'';position:absolute;top:.95rem;right:.85rem;width:9px;height:9px;
+  border-top:1px solid rgba(237,235,228,.42);border-right:1px solid rgba(237,235,228,.42)}
 .bde-grid {display:grid;grid-template-columns:1fr 1fr;gap:.65rem;padding:0 0 1rem}
 .bde-legend{display:flex;gap:1rem;align-items:center}
 .bde-chart{height:272px}
@@ -262,25 +311,43 @@ html{-webkit-font-smoothing:antialiased}body{background:#000}
   animation:scanSweep .95s cubic-bezier(.33,0,.2,1) 1 forwards}
 @keyframes scanSweep{to{transform:translateX(330%)}}
 
-.bde-ctx{display:flex;border:1px solid rgba(240,237,232,.08);border-radius:8px;
-  overflow-x:auto;margin-bottom:1.4rem;background:rgba(240,237,232,.01);
+.bde-ctx{display:flex;border:1px solid rgba(237,235,228,.08);border-radius:8px;
+  overflow-x:auto;margin-bottom:1.4rem;background:rgba(237,235,228,.01);
   scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .bde-ctx::-webkit-scrollbar{display:none}
 .bde-ctx-item{display:flex;align-items:center;gap:.36rem;padding:.58rem .88rem;
-  border-right:1px solid rgba(240,237,232,.08);flex-shrink:0}
+  border-right:1px solid rgba(237,235,228,.08);flex-shrink:0}
 
 @media(max-width:680px){
   .bde-cards{grid-template-columns:repeat(2,1fr)!important}
+  .statcell:nth-child(odd){border-left:none}
+  .statcell{padding-left:.15rem}
   .bde-grid {grid-template-columns:1fr!important}
   .bde-chart{height:230px!important}
   .bde-ps{display:none}
   .bde-legend{flex-wrap:wrap;width:100%;gap:.45rem .9rem}
+  .win-title{display:none}
 }
-@media(max-width:380px){.bde-cards{grid-template-columns:1fr!important}}
+@media(max-width:380px){.bde-cards{grid-template-columns:1fr!important}.statcell{border-left:none!important}}
 `;
 
 // ─────────────────────────────────────────────
-//  INTRO
+//  SIGNATURE HALO  (LOCKED — barkley-halo.js, same engine as getbarkley.com)
+// ─────────────────────────────────────────────
+function Halo({ size, opts, style }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el && window.BarkleyHalo && !el.__bhMounted) {
+      el.__bhMounted = true;
+      window.BarkleyHalo.mount(el, opts || {});
+    }
+  }, []);
+  return <div ref={ref} aria-hidden style={{width:size,height:size,flexShrink:0,...style}}/>;
+}
+
+// ─────────────────────────────────────────────
+//  INTRO — v9 hero opening: signature halo above the thesis
 // ─────────────────────────────────────────────
 function Intro({ onBegin }) {
   const [p, setP] = useState(0);
@@ -288,81 +355,67 @@ function Intro({ onBegin }) {
   useEffect(() => {
     const add = (fn,ms) => { const t=setTimeout(fn,ms); timers.current.push(t); };
     add(()=>setP(1),200); add(()=>setP(2),750); add(()=>setP(3),1400);
-    add(()=>setP(4),2050); add(()=>setP(5),2600); add(onBegin,8000);
+    add(()=>setP(4),2050); add(()=>setP(5),2600); add(onBegin,9000);
     return () => timers.current.forEach(clearTimeout);
   }, [onBegin]);
 
   const sh = n => ({
     opacity:p>=n?1:0, position:"relative", zIndex:1,
     transform:p>=n?"none":"translateY(13px)",
-    transition:"opacity .7s ease,transform .7s ease",
+    transition:"opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)",
   });
 
   return (
-    <div style={{position:"fixed",inset:0,zIndex:200,
-      background:"radial-gradient(ellipse 80% 55% at 50% 44%,#09090f,#000)",
+    <div style={{position:"fixed",inset:0,zIndex:200,background:C.bg,
       display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
       padding:"2rem",textAlign:"center",overflow:"hidden"}}>
 
-      <div aria-hidden style={{
-        position:"absolute", top:"50%", left:"50%",
-        transform:"translate(-50%,-50%)", pointerEvents:"none",
-      }}>
-        <img
-          src="https://getbarkley.com/images/Barkley_Halo_512x512.png"
-          alt=""
-          decoding="async"
-          onError={(e) => { e.currentTarget.style.display = "none"; }}
-          style={{
-            width:"min(520px,90vw)", height:"min(520px,90vw)",
-            display:"block",
-            animation:"haloBreath 4s ease-in-out infinite",
-          }}
-        />
+      {/* quiet v9 atmosphere */}
+      <div aria-hidden style={{position:"absolute",inset:0,pointerEvents:"none",
+        background:"radial-gradient(ellipse 60% 45% at 50% 38%,rgba(123,159,255,.07),transparent 70%)"}}/>
+
+      <div style={{...sh(1),marginBottom:"2.2rem"}}>
+        <Halo size="clamp(140px,18vw,190px)"
+          opts={{stroke:2.2,bloom:1.15,wobble:6.5,pulse:0.08,pulseHz:0.5}}/>
       </div>
 
-      <div style={{...sh(1),marginBottom:"2.5rem"}}>
-        <div aria-hidden style={{width:8,height:8,borderRadius:"50%",margin:"0 auto",
-          background:C.teal,boxShadow:`0 0 18px ${C.teal}`,animation:"pulse 2.2s ease infinite"}}/>
-      </div>
-
-      <h1 style={{...sh(2),fontFamily:SANS,fontWeight:700,color:C.white,
-        fontSize:"clamp(1.65rem,5.2vw,3.3rem)",letterSpacing:"-0.035em",
-        lineHeight:1.08,margin:"0 0 1.2rem",maxWidth:580}}>
-        Breed models miss what{" "}
-        <span style={{background:"linear-gradient(128deg,#7b9fff,#c97bff)",
-          WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
-          individual baselines
-        </span>{" "}reveal.
-      </h1>
-
-      <p style={{...sh(3),fontFamily:SANS,fontSize:"clamp(13px,2vw,15px)",
-        color:C.dim,lineHeight:1.7,margin:"0 0 1.3rem",maxWidth:360}}>
-        Same dog.&ensp;Same data.&ensp;Different reference frame.
+      <p style={{...sh(2),display:"flex",alignItems:"center",gap:"0.8rem",fontFamily:MONO,
+        fontSize:10,letterSpacing:"0.22em",textTransform:"uppercase",
+        color:C.muted,margin:"0 0 1.8rem"}}>
+        <span aria-hidden style={{width:30,height:1,background:"linear-gradient(90deg,transparent,rgba(237,235,228,.3))"}}/>
+        Barkley · Experimental Research Tool · Individual Baselines
+        <span aria-hidden style={{width:30,height:1,background:"linear-gradient(90deg,rgba(237,235,228,.3),transparent)"}}/>
       </p>
 
-      <div style={{...sh(4),display:"inline-flex",alignItems:"center",gap:"0.5rem",
-        padding:"0.32rem 0.82rem",border:"1px solid rgba(123,159,255,.22)",
-        borderRadius:100,background:"rgba(123,159,255,.07)",marginBottom:"2.4rem"}}>
-        <div aria-hidden style={{width:5,height:5,borderRadius:"50%",
-          background:C.teal,boxShadow:`0 0 8px ${C.teal}`,animation:"pulse 2s infinite"}}/>
-        <span style={{fontSize:11,fontFamily:MONO,color:"rgba(123,159,255,.82)",letterSpacing:"0.04em"}}>
-          {DOG.name} · {DOG.breed} · Monitoring
+      <h1 style={{...sh(3),fontFamily:DISP,fontWeight:500,color:C.white,
+        fontSize:"clamp(1.9rem,5.6vw,3.6rem)",letterSpacing:"-0.045em",
+        lineHeight:1.05,margin:"0 0 1.3rem",maxWidth:640}}>
+        Every intelligence starts{" "}
+        <span style={{fontFamily:SERIF,fontStyle:"italic",fontWeight:400,fontSize:"1.05em",
+          background:GRAD,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+          with a reference.
         </span>
-      </div>
+      </h1>
 
-      <button className="bde-ibtn" onClick={onBegin}
+      <p style={{...sh(4),fontFamily:SANS,fontSize:"clamp(13px,1.6vw,15.5px)",
+        color:C.dim,lineHeight:1.65,margin:"0 0 2.2rem",maxWidth:520}}>
+        Switch between a breed average and an individual baseline to see why population
+        statistics can miss slow behavioral drift. Built for dogs. Designed to change
+        how intelligence is measured.
+      </p>
+
+      <button className="bde-link" onClick={onBegin}
         aria-label="Begin the behavioral intelligence demo"
-        style={{...sh(5),fontFamily:SANS,fontSize:13,fontWeight:600,
-          padding:"0.72rem 2rem",border:"1px solid rgba(240,237,232,.22)",
-          borderRadius:8,background:"rgba(240,237,232,.06)",color:C.white,
-          cursor:"pointer",transition:"background .2s"}}>
+        style={{...sh(5),fontFamily:DISP,fontSize:14,fontWeight:600,
+          padding:"0.85rem 2.2rem",border:"none",borderRadius:999,
+          background:GRAD,color:"#fff",cursor:"pointer",
+          boxShadow:"0 14px 34px -14px rgba(150,120,255,.7)",transition:"opacity .2s"}}>
         Begin →
       </button>
 
       <p aria-hidden style={{position:"absolute",bottom:"1.4rem",fontSize:9,
-        fontFamily:MONO,color:C.ghost,letterSpacing:"0.12em",textTransform:"uppercase"}}>
-        Barkley · Proof of Usefulness · HackerNoon 2026
+        fontFamily:MONO,color:C.ghost,letterSpacing:"0.14em",textTransform:"uppercase"}}>
+        Experimental research visualization · Synthetic data only
       </p>
     </div>
   );
@@ -382,8 +435,8 @@ function ProfileBanner({ isBreed }) {
         K
       </div>
       <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:"clamp(1rem,2.5vw,1.1rem)",fontWeight:700,
-          letterSpacing:"-0.02em",color:C.white,marginBottom:"0.15rem",fontFamily:SANS}}>
+        <div style={{fontSize:"clamp(1rem,2.5vw,1.1rem)",fontWeight:600,
+          letterSpacing:"-0.02em",color:C.white,marginBottom:"0.15rem",fontFamily:DISP}}>
           {DOG.name}
         </div>
         <div style={{fontSize:11,color:C.muted,fontFamily:MONO,lineHeight:1.4}}>
@@ -450,30 +503,27 @@ function BTooltip({ active, payload, view }) {
 //  CARD
 // ─────────────────────────────────────────────
 function Card({ label, val, sub, insight, accent, pulse=false, animDelay=0, animated=false }) {
+  /* v9 benchmark cell: hairline divider, corner bracket, mono label, display value */
   return (
-    <div style={{borderRadius:10,border:"1px solid rgba(240,237,232,.09)",
-      borderLeft:`2px solid ${accent}`,padding:"1rem 1.1rem",background:C.s1,
-      fontFamily:SANS,display:"flex",flexDirection:"column",
+    <div className="statcell" style={{fontFamily:SANS,
       ...(animated?{animation:`cardIn .48s ${animDelay}ms ease both`}:{})}}>
-      <div>
-        <div style={{display:"flex",alignItems:"center",gap:"0.4rem",marginBottom:"0.45rem"}}>
-          <div aria-hidden style={{width:5,height:5,borderRadius:"50%",flexShrink:0,background:accent,
-            boxShadow:pulse&&animated?`0 0 7px ${accent}`:"none",
-            animation:pulse&&animated?"pulse 1.9s ease infinite":"none"}}/>
-          <span style={{fontSize:9.5,textTransform:"uppercase",letterSpacing:"0.1em",color:C.muted,fontFamily:MONO}}>
-            {label}
-          </span>
-        </div>
-        <div style={{fontSize:"clamp(.86rem,2.2vw,1.18rem)",fontWeight:700,
-          letterSpacing:"-0.02em",color:accent,marginBottom:"0.2rem",fontFamily:MONO}}>
-          {val}
-        </div>
-        <div style={{fontSize:10.5,color:C.muted,lineHeight:1.45}}>{sub}</div>
+      <div style={{display:"flex",alignItems:"center",gap:"0.4rem",marginBottom:"0.65rem"}}>
+        <div aria-hidden style={{width:5,height:5,borderRadius:"50%",flexShrink:0,background:accent,
+          boxShadow:pulse&&animated?`0 0 7px ${accent}`:"none",
+          animation:pulse&&animated?"pulse 1.9s ease infinite":"none"}}/>
+        <span style={{fontSize:9.5,textTransform:"uppercase",letterSpacing:"0.1em",color:C.muted,fontFamily:MONO}}>
+          {label}
+        </span>
       </div>
-      {insight && (<>
-        <div style={{height:1,background:C.line,margin:"0.7rem 0 0.6rem"}}/>
-        <p style={{fontSize:12,color:C.dim,lineHeight:1.55,fontStyle:"italic"}}>"{insight}"</p>
-      </>)}
+      <div style={{fontFamily:DISP,fontSize:"clamp(1.15rem,2.6vw,1.65rem)",fontWeight:500,lineHeight:1,
+        letterSpacing:"-0.03em",color:accent===C.muted?C.white:accent,marginBottom:"0.35rem"}}>
+        {val}
+      </div>
+      <div style={{fontSize:10,color:C.muted,lineHeight:1.5,fontFamily:MONO}}>{sub}</div>
+      {insight && (
+        <p style={{marginTop:"0.7rem",fontSize:13,color:C.dim,lineHeight:1.5,
+          fontFamily:SERIF,fontStyle:"italic"}}>"{insight}"</p>
+      )}
     </div>
   );
 }
@@ -496,30 +546,33 @@ function LI({ color, label, type }) {
   );
 }
 
-function CtrlBtn({ children, onClick, disabled, active, activeColor }) {
+function CtrlBtn({ children, onClick, disabled, active }) {
+  /* v9 ghost pill — white, hairline border, same as the site's secondary buttons */
   return (
     <button className="bde-ctrl" onClick={onClick} disabled={disabled} aria-pressed={active}
-      style={{padding:"0.36rem 0.8rem",fontSize:11.5,fontWeight:500,fontFamily:SANS,
-        border:`1px solid ${active?`${activeColor}55`:"rgba(240,237,232,.14)"}`,
-        borderRadius:6,background:"transparent",
-        color:active?activeColor:C.muted,cursor:disabled?"default":"pointer",
-        display:"flex",alignItems:"center",gap:"0.3rem",
-        transition:"color .2s,border-color .2s",opacity:disabled?.4:1}}>
+      style={{padding:"0.5rem 1.15rem",fontSize:12,fontWeight:600,fontFamily:DISP,
+        border:`1px solid ${active?"rgba(237,235,228,.44)":"rgba(237,235,228,.18)"}`,
+        borderRadius:999,background:active?"rgba(255,255,255,.06)":"transparent",
+        color:C.white,cursor:disabled?"default":"pointer",
+        display:"flex",alignItems:"center",gap:"0.35rem",
+        transition:"border-color .2s,background .2s",opacity:disabled?.55:1}}>
       {children}
     </button>
   );
 }
 
 function CTALink({ href, children, variant="ghost" }) {
+  /* v9 pill buttons: gradient primary, ghost outline */
   const S = {
-    primary:{background:C.white,                color:"#000",border:"none"},
-    accent: {background:"rgba(123,159,255,.1)", color:C.blue,border:"1px solid rgba(123,159,255,.28)"},
-    ghost:  {background:"transparent",          color:C.dim, border:"1px solid rgba(240,237,232,.14)"},
+    primary:{background:GRAD,                   color:"#fff", border:"none",
+             boxShadow:"0 14px 34px -14px rgba(150,120,255,.7)"},
+    accent: {background:"rgba(123,159,255,.1)", color:C.blue, border:"1px solid rgba(123,159,255,.28)"},
+    ghost:  {background:"transparent",          color:C.white,border:"1px solid rgba(237,235,228,.18)"},
   }[variant];
   return (
     <a href={href} target="_blank" rel="noopener noreferrer" className="bde-link"
-      style={{...S,padding:"0.62rem 1.4rem",fontSize:12.5,fontWeight:600,fontFamily:SANS,
-        borderRadius:8,textDecoration:"none",display:"inline-block",transition:"opacity .2s"}}>
+      style={{...S,padding:"0.66rem 1.5rem",fontSize:12.5,fontWeight:600,fontFamily:DISP,
+        borderRadius:999,textDecoration:"none",display:"inline-block",transition:"opacity .2s"}}>
       {children}
     </a>
   );
@@ -556,6 +609,16 @@ export default function BarkleyDriftExplorer() {
     return () => clearTimeout(t);
   }, [playing, animDays]);
 
+  // autoplay the 90-day record once, when the explorer opens
+  const autoPlayed = useRef(false);
+  useEffect(() => {
+    if (showIntro || autoPlayed.current) return;
+    autoPlayed.current = true;
+    let reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch {}
+    if (!reduce) { setAnimDays(1); setPlaying(true); }
+  }, [showIntro]);
+
   if (showIntro) return <><style>{CSS}</style><Intro onBegin={handleBegin}/></>;
 
   return (
@@ -563,104 +626,107 @@ export default function BarkleyDriftExplorer() {
       <style>{CSS}</style>
       <div className="bde-main" style={{minHeight:"100vh",background:C.bg,color:C.white,fontFamily:SANS}}>
 
+        {/* v9 atmosphere — faint fixed grid */}
+        <div aria-hidden style={{position:"fixed",inset:-2,zIndex:0,pointerEvents:"none",
+          backgroundImage:"linear-gradient(rgba(237,235,228,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(237,235,228,.016) 1px,transparent 1px)",
+          backgroundSize:"88px 88px",
+          WebkitMaskImage:"radial-gradient(ellipse 100% 62% at 50% 0%,#000 28%,transparent 95%)",
+          maskImage:"radial-gradient(ellipse 100% 62% at 50% 0%,#000 28%,transparent 95%)"}}/>
+
         {/* HEADER */}
         <header style={{padding:"1.4rem 2rem",borderBottom:`1px solid ${C.line}`,
           display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"0.75rem"}}>
-          <div style={{display:"flex",alignItems:"center",gap:"0.65rem"}}>
-            <div aria-hidden style={{width:7,height:7,borderRadius:"50%",
-              background:C.teal,boxShadow:`0 0 10px ${C.teal}`,animation:"pulse 2.2s ease infinite"}}/>
-            <img
-              src="https://getbarkley.com/images/Barkley_Logo.png"
-              alt="Barkley AI"
-              decoding="async"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-                const fb = e.currentTarget.nextElementSibling;
-                if (fb) fb.style.display = "inline";
-              }}
-              style={{ height:"100px", display:"block" }}
-            />
-            <span style={{display:"none",fontWeight:700,fontSize:"1.05rem",letterSpacing:"-0.02em",color:C.white}}>
-              Barkley.
+          <a href="https://getbarkley.com" target="_blank" rel="noopener noreferrer"
+            style={{display:"flex",alignItems:"center",gap:"0.62rem",textDecoration:"none"}}>
+            <Halo size={30} opts={{stroke:1.7,bloom:0.7,wobble:6,pulse:0.07}}/>
+            <span style={{fontFamily:DISP,fontWeight:600,fontSize:"1.05rem",letterSpacing:"-0.02em",color:C.white}}>
+              Barkley<span style={{color:C.pink}}>.</span>
             </span>
-            <span style={{fontSize:9.5,color:C.muted,fontFamily:MONO,letterSpacing:"0.07em",
+            <span style={{fontSize:9.5,color:C.muted,fontFamily:MONO,letterSpacing:"0.07em",textTransform:"uppercase",
               borderLeft:`1px solid ${C.line}`,paddingLeft:"0.65rem"}}>
               Drift Explorer
             </span>
-          </div>
-          <div style={{display:"flex",gap:"0.45rem",alignItems:"center"}}>
-            <CtrlBtn onClick={handleToggleCtx} active={showCtx} activeColor={C.amber}>◈ Context</CtrlBtn>
-            <CtrlBtn onClick={handleReplay} disabled={playing}>
-              {playing
-                ? <span style={{display:"flex",alignItems:"center",gap:"0.3rem"}}>
-                    <span aria-hidden style={{width:5,height:5,borderRadius:"50%",background:C.teal,
-                      display:"inline-block",animation:"pulse .8s infinite"}}/>
-                    Day {animDays}
-                  </span>
-                : "↺ Replay 90 days"}
-            </CtrlBtn>
-          </div>
+          </a>
+          <span style={{fontSize:9.5,color:C.ghost,fontFamily:MONO,letterSpacing:"0.14em",textTransform:"uppercase"}}>
+            Experimental Research Tool
+          </span>
         </header>
 
-        <main style={{maxWidth:1040,margin:"0 auto",padding:"0 1.5rem"}}>
+        <main style={{maxWidth:1120,margin:"0 auto",padding:"0 1.5rem",position:"relative",zIndex:1}}>
+
+          {/* FRAMING — v9 lead above the window */}
+          <p style={{
+            fontFamily:DISP,fontWeight:500,letterSpacing:"-0.035em",lineHeight:1.15,
+            fontSize:"clamp(1.25rem,2.6vw,1.7rem)",color:C.white,padding:"2rem 0 0",
+          }}>
+            Same dog. Same data. Two reference frames.{" "}
+            <span style={{fontFamily:SERIF,fontStyle:"italic",fontWeight:400,fontSize:"1.05em",
+              background:GRAD,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+              One system sees "normal." The other sees drift.
+            </span>
+          </p>
+
+          {/* ═══ jSite WINDOW — the experiment ═══ */}
+          <div className="win">
+            <div className="win-bar">
+              <span className="win-dots" aria-hidden>
+                <i style={{background:"#ff5f57"}}/><i style={{background:"#febc2e"}}/><i style={{background:"#28c840"}}/>
+              </span>
+              <span className="win-title" style={{transform:"translateX(-24px)"}}>
+                <b>kikoo_90d.behavior</b> — Barkley Drift Explorer
+              </span>
+            </div>
+            <div className="win-body">
 
           {/* PROFILE */}
           <ProfileBanner isBreed={isBreed}/>
 
-          {/* FRAMING */}
-          <p style={{
-            fontSize:11.5, color:C.muted, fontFamily:SANS, lineHeight:1.55,
-            padding:"0.9rem 0 0",
-          }}>
-            Same dog, same data — two reference frames.{" "}
-            <span style={{color:C.dim}}>This is why individual baselines matter.</span>
-          </p>
-
-          {/* TOGGLE */}
+          {/* TOGGLE — v9 segmented control + serif verdict */}
           <div className="bde-tg-eyebrow">
-            Same dog · same data — <b>switch the reference frame</b>
+            <b>Switch the reference frame</b>
+            <span aria-hidden>·</span>
+            Breed average vs. individual baseline
           </div>
-          <div className="bde-grid" role="group" aria-label="Select comparison reference frame">
-
-            <button className="bde-toggle" data-frame="breed" data-active={isBreed}
-              onClick={() => switchView("breed")} aria-pressed={isBreed}>
-              <div className="bde-tg-head">
-                <span className="bde-tg-dot" aria-hidden />
-                <span className="bde-tg-label">Breed Average</span>
-                <span className="bde-tg-state" aria-hidden>Active</span>
+          <div role="group" aria-label="Select comparison reference frame"
+            style={{display:"flex",alignItems:"center",justifyContent:"space-between",
+              gap:"1rem 1.4rem",flexWrap:"wrap",margin:"0 0 1.1rem"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"0.55rem",flexWrap:"wrap"}}>
+              <div className="seg">
+                <button className="seg-btn" data-on={isBreed} aria-pressed={isBreed}
+                  onClick={() => switchView("breed")}>Breed average</button>
+                <button className="seg-btn" data-on={!isBreed} aria-pressed={!isBreed}
+                  onClick={() => switchView("individual")}>Individual baseline</button>
               </div>
-              <p className="bde-tg-verdict">
-                {isBreed
-                  ? "Everything looks normal for a Jack Russell."
-                  : "Population reference frame"}
-              </p>
-            </button>
-
-            <button className="bde-toggle" data-frame="individual" data-active={!isBreed}
-              onClick={() => switchView("individual")} aria-pressed={!isBreed}>
-              <div className="bde-tg-head">
-                <span className="bde-tg-dot" aria-hidden />
-                <span className="bde-tg-label">{DOG.name}'s Baseline</span>
-                <span className="bde-tg-state" aria-hidden>Active</span>
-              </div>
-              <p className="bde-tg-verdict">
-                {!isBreed
-                  ? `${DOG.name} is drifting from their own baseline.`
-                  : "Individual reference frame"}
-              </p>
-            </button>
+              <CtrlBtn onClick={handleToggleCtx} active={showCtx}>
+                {showCtx ? "Hide context" : "Show context"}
+              </CtrlBtn>
+              <CtrlBtn onClick={handleReplay} disabled={playing}>
+                {playing
+                  ? <span style={{display:"flex",alignItems:"center",gap:"0.3rem"}}>
+                      <span aria-hidden style={{width:5,height:5,borderRadius:"50%",background:C.teal,
+                        display:"inline-block",animation:"pulse .8s infinite"}}/>
+                      Day {animDays}
+                    </span>
+                  : "↺ Replay 90 days"}
+              </CtrlBtn>
+            </div>
+            <p className="bde-verdict" aria-live="polite" style={{margin:0,maxWidth:"44ch"}}>
+              {isBreed
+                ? "Looks normal for a Jack Russell."
+                : `Drift emerging from ${DOG.name}'s own baseline.`}
+            </p>
           </div>
 
           {/* STATUS BANNER */}
           <div role="status" aria-live="polite"
             style={{padding:"0.9rem 1.3rem",marginBottom:"1rem",
-              border:`1px solid ${isBreed?"rgba(240,237,232,.1)":"rgba(201,123,255,.28)"}`,
+              border:`1px solid ${isBreed?"rgba(237,235,228,.1)":"rgba(201,123,255,.28)"}`,
               borderRadius:10,
-              background:isBreed?"rgba(240,237,232,.02)":"rgba(201,123,255,.05)",
+              background:isBreed?"rgba(237,235,228,.02)":"rgba(201,123,255,.05)",
               display:"flex",alignItems:"flex-start",gap:"0.85rem",
               transition:"border-color .4s,background .4s"}}>
             <div aria-hidden style={{width:8,height:8,borderRadius:"50%",flexShrink:0,marginTop:3,
-              background:isBreed?"rgba(240,237,232,.42)":C.pink,
+              background:isBreed?"rgba(237,235,228,.42)":C.pink,
               boxShadow:isBreed?"none":`0 0 10px ${C.pink}`,
               transition:"background .4s,box-shadow .4s"}}/>
             <div>
@@ -671,32 +737,25 @@ export default function BarkleyDriftExplorer() {
               <p style={{fontSize:12,color:C.muted,lineHeight:1.55}}>
                 {isBreed
                   ?`${DOG.name} remains within expected ranges for a ${DOG.breed}.`
-                  :`${DOG.name}'s individual baseline reveals a pattern invisible to breed averages.`}
+                  :"The change is invisible to the breed average, but visible against the individual trajectory."}
               </p>
             </div>
           </div>
 
-          {/* CHART */}
-          <div className="bde-chartwrap" data-frame={view}
-            style={{border:`1px solid ${C.line}`,borderRadius:12,background:C.s1,
-            padding:"1.2rem .5rem .7rem",marginBottom:"1rem",position:"relative",overflow:"hidden"}}>
-            <div aria-hidden style={{position:"absolute",inset:0,zIndex:0,pointerEvents:"none",
-              backgroundImage:"radial-gradient(circle,rgba(240,237,232,.036) 1px,transparent 1px)",
-              backgroundSize:"32px 32px"}}/>
-            <div aria-hidden style={{position:"absolute",top:0,left:0,right:0,height:36,
-              zIndex:1,pointerEvents:"none",
-              background:"linear-gradient(to bottom,rgba(6,6,10,.9),transparent)"}}/>
+          {/* CHART — v9 épuré: dotted grid, no frame */}
+          <div className="dotgrid" data-frame={view}
+            style={{padding:"1.2rem 0 .5rem",marginBottom:"1.2rem",position:"relative",overflow:"hidden"}}>
             {!isBreed && <div key={`scan-${cardKey}`} className="bde-scan" aria-hidden/>}
 
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-              padding:"0 1.3rem .85rem",position:"relative",zIndex:2,flexWrap:"wrap",gap:"0.5rem"}}>
+              padding:"0 .2rem .85rem",position:"relative",zIndex:2,flexWrap:"wrap",gap:"0.5rem"}}>
               <span style={{fontSize:9.5,fontFamily:MONO,letterSpacing:"0.08em",textTransform:"uppercase",color:C.muted}}>
                 {DOG.name}'s behavioral activity score · {isBreed?"Breed frame":"Individual frame"}
               </span>
               <div className="bde-legend">
                 {isBreed?(<>
-                  <LI color="rgba(240,237,232,.18)" label="Breed ±1σ" type="band"/>
-                  <LI color="rgba(240,237,232,.72)" label={DOG.name}  type="line"/>
+                  <LI color="rgba(237,235,228,.18)" label="Breed ±1σ" type="band"/>
+                  <LI color="rgba(237,235,228,.72)" label={DOG.name}  type="line"/>
                 </>):(<>
                   <LI color={C.blue} label="Baseline" type="dash"/>
                   <LI color={C.blue} label="Stable"   type="line"/>
@@ -717,19 +776,19 @@ export default function BarkleyDriftExplorer() {
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={data} margin={{top:4,right:64,bottom:2,left:0}}>
                   <XAxis dataKey="day" tickLine={false}
-                    axisLine={{stroke:"rgba(240,237,232,.08)"}}
+                    axisLine={{stroke:"rgba(237,235,228,.08)"}}
                     tick={{fill:C.muted,fontSize:9.5,fontFamily:MONO}}
                     tickFormatter={v=>(v===1||v%15===0)?`D${v}`:""}
                     interval={0}/>
                   <YAxis domain={[30,110]} tickLine={false} axisLine={false} tickCount={5}
                     tick={{fill:C.muted,fontSize:9.5,fontFamily:MONO}}/>
                   <Tooltip content={<BTooltip view={view}/>}
-                    cursor={{stroke:"rgba(240,237,232,.07)",strokeDasharray:"4 4",strokeWidth:1}}
+                    cursor={{stroke:"rgba(237,235,228,.07)",strokeDasharray:"4 4",strokeWidth:1}}
                     isAnimationActive={false}/>
 
                   <ReferenceArea y1={BREED_MU-BREED_SIG} y2={BREED_MU+BREED_SIG}
-                    fill={isBreed?"rgba(240,237,232,.05)":"rgba(240,237,232,.022)"}
-                    stroke={isBreed?"rgba(240,237,232,.1)":"rgba(240,237,232,.045)"}
+                    fill={isBreed?"rgba(237,235,228,.05)":"rgba(237,235,228,.022)"}
+                    stroke={isBreed?"rgba(237,235,228,.1)":"rgba(237,235,228,.045)"}
                     strokeWidth={1} ifOverflow="extendDomain"/>
 
                   {SIL_SPANS.map((r,i)=>(
@@ -743,7 +802,7 @@ export default function BarkleyDriftExplorer() {
                       label={{value:ev.short,position:"insideTop",fill:ev.color,fontSize:11,fontFamily:MONO}}/>
                   ))}
 
-                  {isBreed&&<ReferenceLine y={BREED_MU} stroke="rgba(240,237,232,.2)"
+                  {isBreed&&<ReferenceLine y={BREED_MU} stroke="rgba(237,235,228,.2)"
                     strokeDasharray="5 4" strokeWidth={1.5}
                     label={{value:`μ ${BREED_MU}`,position:"right",fill:C.muted,fontSize:9.5,fontFamily:MONO}}/>}
                   {!isBreed&&<ReferenceLine y={BASELINE} stroke="rgba(123,159,255,.55)"
@@ -753,16 +812,16 @@ export default function BarkleyDriftExplorer() {
                     stroke="rgba(201,123,255,.2)" strokeWidth={1} strokeDasharray="2 4"/>}
 
                   {isBreed&&(<>
-                    <Line dataKey="value" stroke="rgba(240,237,232,.09)" strokeWidth={5} dot={false} connectNulls={false} isAnimationActive={false}/>
-                    <Line dataKey="value" stroke="rgba(240,237,232,.75)" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false}/>
+                    <Line dataKey="value" stroke="rgba(237,235,228,.08)" strokeWidth={4} dot={false} connectNulls={false} isAnimationActive={false}/>
+                    <Line dataKey="value" stroke="rgba(237,235,228,.78)" strokeWidth={1.6} dot={false} connectNulls={false} isAnimationActive={false}/>
                   </>)}
                   {!isBreed&&(<>
-                    <Line dataKey="stableVal" stroke="rgba(123,159,255,.11)" strokeWidth={5} dot={false} connectNulls={false} isAnimationActive={false}/>
-                    <Line dataKey="stableVal" stroke={C.blue} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false}/>
-                    <Line key={`drift-glow-${cardKey}`} dataKey="driftVal" stroke="rgba(201,123,255,.11)" strokeWidth={5}
+                    <Line dataKey="stableVal" stroke="rgba(123,159,255,.1)" strokeWidth={4} dot={false} connectNulls={false} isAnimationActive={false}/>
+                    <Line dataKey="stableVal" stroke={C.blue} strokeWidth={1.6} dot={false} connectNulls={false} isAnimationActive={false}/>
+                    <Line key={`drift-glow-${cardKey}`} dataKey="driftVal" stroke="rgba(201,123,255,.12)" strokeWidth={4}
                       dot={false} connectNulls={false}
                       isAnimationActive={!playing} animationDuration={900} animationEasing="ease-out"/>
-                    <Line key={`drift-${cardKey}`} dataKey="driftVal" stroke={C.pink} strokeWidth={2.6}
+                    <Line key={`drift-${cardKey}`} dataKey="driftVal" stroke={C.pink} strokeWidth={1.8}
                       dot={false} connectNulls={false}
                       isAnimationActive={!playing} animationDuration={900} animationEasing="ease-out"/>
                   </>)}
@@ -771,8 +830,8 @@ export default function BarkleyDriftExplorer() {
             </div>
 
             {playing&&(
-              <div aria-hidden style={{margin:"0.4rem 1.3rem 0",height:2,
-                background:"rgba(240,237,232,.06)",borderRadius:2,overflow:"hidden"}}>
+              <div aria-hidden style={{margin:"0.4rem .2rem 0",height:2,
+                background:"rgba(237,235,228,.06)",borderRadius:2,overflow:"hidden"}}>
                 <div style={{height:"100%",width:`${(animDays/90)*100}%`,
                   background:`linear-gradient(90deg,${C.blue},${C.pink})`,
                   borderRadius:2,transition:"width .05s linear"}}/>
@@ -780,10 +839,10 @@ export default function BarkleyDriftExplorer() {
             )}
 
             <p style={{
-              padding:"0.7rem 1.3rem 0", fontSize:9, fontFamily:MONO,
-              color:C.ghost, letterSpacing:"0.1em", textTransform:"uppercase",
+              padding:"0.7rem .2rem 0", fontSize:9, fontFamily:MONO,
+              color:C.ghost, letterSpacing:"0.08em",
             }}>
-              Synthetic data · prototype visualization
+              Synthetic data · seed 2026 · schema: labs-barkley/barkley-canine-cognition-lab
             </p>
           </div>
 
@@ -798,7 +857,7 @@ export default function BarkleyDriftExplorer() {
           {showCtx&&(
             <div className="bde-ctx" role="list" aria-label="Context events legend">
               {[
-                {color:"rgba(240,237,232,.2)",label:"Breed ±1σ",dot:"rect"},
+                {color:"rgba(237,235,228,.2)",label:"Breed ±1σ",dot:"rect"},
                 ...CTX_EVENTS.map(e=>({color:e.color,label:e.label,dot:"sq"})),
                 {color:C.teal,label:"Silence · informative absence",dot:"circ"},
               ].map((e,i)=>(
@@ -835,19 +894,32 @@ export default function BarkleyDriftExplorer() {
             </div>
           )}
 
+            </div>{/* /win-body */}
+            <div className="win-status">
+              <span className="br">⎇ main</span>
+              <span className="ok">✓ synthetic · seed 2026</span>
+              <span>90-day window</span>
+              <span>UTF-8</span>
+              <a href="https://doi.org/10.5281/zenodo.20060327" target="_blank" rel="noopener noreferrer"
+                style={{marginLeft:"auto"}}>Zenodo ↗</a>
+              <a href="https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample"
+                target="_blank" rel="noopener noreferrer">Hugging Face ↗</a>
+            </div>
+          </div>{/* /win */}
+
           {/* CTA FOOTER */}
-          <footer style={{border:`1px solid ${C.line}`,borderRadius:12,padding:"2.2rem",
-            background:C.s1,textAlign:"center",marginBottom:"2.5rem"}}>
-            <p style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.15em",
-              color:C.ghost,fontFamily:MONO,marginBottom:"0.85rem"}}>
-              Barkley AI · Applied Research · Pre-Seed
+          <footer style={{borderTop:`1px solid ${C.line}`,padding:"3rem 0 2.6rem",
+            textAlign:"center",marginTop:"2.8rem",marginBottom:"1.2rem"}}>
+            <p style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.18em",
+              color:C.muted,fontFamily:MONO,marginBottom:"0.85rem"}}>
+              Barkley · Experimental Research Tool · Individual Baselines
             </p>
-            <h2 style={{fontSize:"clamp(1.2rem,3vw,1.85rem)",fontWeight:700,
-              letterSpacing:"-0.025em",lineHeight:1.1,margin:"0 0 0.65rem"}}>
-              Because your dog is{" "}
-              <span style={{background:`linear-gradient(128deg,${C.blue},${C.pink})`,
-                WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
-                not an average.
+            <h2 style={{fontFamily:DISP,fontSize:"clamp(1.3rem,3.2vw,2rem)",fontWeight:500,
+              letterSpacing:"-0.04em",lineHeight:1.08,margin:"0 0 0.65rem",color:C.white}}>
+              Same dog. Same data.{" "}
+              <span style={{fontFamily:SERIF,fontStyle:"italic",fontWeight:400,fontSize:"1.05em",
+                background:GRAD,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+                Different intelligence.
               </span>
             </h2>
             <p style={{fontSize:13,color:C.muted,lineHeight:1.72,maxWidth:400,margin:"0 auto 1.8rem"}}>
@@ -862,7 +934,7 @@ export default function BarkleyDriftExplorer() {
 
             {/* Reference Architecture — link */}
             <p style={{marginTop:"0.85rem",fontSize:10,fontFamily:MONO,color:C.ghost}}>
-              Explore the computational backbone →{" "}
+              Explore the architecture behind the experiment →{" "}
               <a
                 href="https://github.com/labs-barkley/barkley-reference-architecture"
                 target="_blank"
@@ -874,7 +946,7 @@ export default function BarkleyDriftExplorer() {
             </p>
 
             <p style={{marginTop:"1.2rem",fontSize:9.5,fontFamily:MONO,color:C.ghost}}>
-              Not a diagnostic tool · Synthetic data only · Prototype visualization · © 2026 Barkley AI. All rights reserved.
+              Experimental research visualization · Synthetic data only · Not a diagnostic tool · © 2026 Barkley AI
             </p>
           </footer>
 
