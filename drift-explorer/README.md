@@ -55,17 +55,17 @@ The timeline marks moments of absence and labels their likely nature: collar rem
 
 ## Screenshots
 
-### Desktop overview
+### Breed average — the frame that sees "normal"
 
-!\[Barkley Drift Explorer desktop overview](./public/screenshots/desktop-hero.jpg)
+![Breed average reference frame — Kikoo looks normal for a Jack Russell](./public/screenshots/breed-baseline-preview.jpg)
 
-### Drift reveal
+### Individual baseline — the frame that sees drift
 
-!\[Individual baseline drift reveal](./public/screenshots/drift-reveal.jpg)
+![Individual baseline reference frame — drift emerging from Kikoo's own baseline](./public/screenshots/individual-baseline-preview.jpg)
 
 ### Mobile preview
 
-!\[Mobile preview of Barkley Drift Explorer](./public/screenshots/mobile-preview.jpg)
+![Mobile preview of Barkley Drift Explorer](./public/screenshots/mobile-preview.jpg)
 
 \---
 
@@ -90,7 +90,7 @@ drift-explorer/
 ├── main.jsx
 ├── BarkleyDriftExplorer.jsx
 └── public/
-    └── screenshots/         # desktop-hero.jpg · drift-reveal.jpg · mobile-preview.jpg
+    └── screenshots/         # breed-baseline-preview.jpg · individual-baseline-preview.jpg · mobile-preview.jpg
 ```
 
 \---
