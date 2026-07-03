@@ -1,0 +1,69 @@
+# Barkley DogGraph — self-hosted stack (Neo4j Community + Streamlit + Caddy TLS)
+# Runs the whole demo on one small VPS behind https://doggraph.getbarkley.com
+#
+#   docker compose up -d --build      # start (first run builds the app image)
+#   docker compose logs -f app        # watch the app
+#   docker compose down               # stop (data persists in the named volume)
+#
+# Secrets come from a .env file next to this one (git-ignored). See .env.example.
+name: barkley-doggraph
+
+services:
+  # --- Neo4j Community: the graph. Never exposed to the public internet;
+  #     only the app talks to it over the private compose network. ----------
+  neo4j:
+    image: neo4j:5-community
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_server_memory_heap_max__size: "1G"
+      NEO4J_server_memory_pagecache_size: "512M"
+    volumes:
+      - neo4j_data:/data
+    expose:
+      - "7687"          # bolt — internal network only, NOT published to the host
+    healthcheck:
+      # cypher-shell ships in the neo4j image; the password is interpolated from
+      # .env at compose parse time, so this needs no extra container env.
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p \"${NEO4J_PASSWORD}\" 'RETURN 1' >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 24
+      start_period: 30s
+
+  # --- Streamlit app: the DogGraph UI + GraphRAG layer. -------------------
+  app:
+    build:
+      context: ..                      # the neo4j-doggraph-demo/ folder
+      dockerfile: deploy/streamlit.Dockerfile
+    restart: unless-stopped
+    environment:
+      NEO4J_URI: "neo4j://neo4j:7687"   # internal service name, plain bolt (no TLS needed inside the network)
+      NEO4J_USER: "neo4j"
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-4-5-20251001}
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    expose:
+      - "8501"
+
+  # --- Caddy: reverse proxy + automatic Let's Encrypt HTTPS. --------------
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  neo4j_data:
+  caddy_data:
+  caddy_config:

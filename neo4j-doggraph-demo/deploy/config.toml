@@ -1,0 +1,18 @@
+# Streamlit theme — Barkley v9 (near-black, ink, signature violet).
+[theme]
+base = "dark"
+primaryColor = "#c97bff"
+backgroundColor = "#06070a"
+secondaryBackgroundColor = "#0d0f14"
+textColor = "#edebe4"
+font = "sans serif"
+
+[server]
+headless = true
+address = "0.0.0.0"
+port = 8501
+enableCORS = false
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false

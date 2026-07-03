@@ -1,0 +1,7 @@
+# Caddy — automatic HTTPS (Let's Encrypt) for the DogGraph app.
+# Requires: doggraph.getbarkley.com A-record -> this VPS IP, and ports 80/443 open.
+doggraph.getbarkley.com {
+	encode gzip zstd
+	reverse_proxy app:8501
+	tls labs@getbarkley.com
+}
