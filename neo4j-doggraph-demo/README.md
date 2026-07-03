@@ -4,7 +4,7 @@
 
 > Synthetic data · Research demonstrator · Not a diagnostic tool · Patent applications filed
 
-🔗 **Live app:** **[barkley-doggraph.streamlit.app](https://barkley-doggraph.streamlit.app/)** — the contents of this folder, deployed against a real AuraDB instance, with the LLM/GraphRAG layer enabled.
+🔗 **Live app:** **[doggraph.getbarkley.com](https://doggraph.getbarkley.com/)** — the contents of this folder, self-hosted (Neo4j Community + Streamlit + Caddy, see deploy/), with the LLM/GraphRAG layer enabled.
 
 **A focused Neo4j demo of Barkley's core idea: a dog's behavioral intelligence is
 fundamentally _relational_ — dog ↔ baseline ↔ context ↔ drift ↔ environment ↔
@@ -24,7 +24,7 @@ three Python layers on top: a deterministic intent router, a real
   it on Aura, and synthesizes a grounded answer from the rows. Two layers of safety
   (prompt-level rule + post-hoc validator that refuses `CREATE`/`MERGE`/`DELETE`/
   `SET`/`REMOVE`/`DROP`/`DETACH`/`LOAD CSV`/etc.).
-- 🖥 **Full Streamlit app** — `app.py`, Aura-connected, with the LLM/GraphRAG layer
+- 🖥 **Full Streamlit app** — `app.py`, Neo4j-connected, with the LLM/GraphRAG layer
   behind the input box, schema sidebar, preset queries, and a results table.
   Deployable on Streamlit Community Cloud (free tier) in ~5 minutes.
 - 🌐 **Publication-quality graph render** — `make_seed_render.py` produces
@@ -211,7 +211,7 @@ make_seed_render.py             renders the seeded-graph PNG (above)
 graph_query.py                  deterministic NL → Cypher router (v1)
 graph_query_llm.py              LLM/GraphRAG layer — schema-constrained + read-only
 ask.py                          CLI; supports --llm
-app.py                          Streamlit app (Aura-connected)
+app.py                          Streamlit app (Neo4j-connected)
 requirements.txt                Python deps (only needed for the Python layers)
 .env.example                    env var names for local runs
 .streamlit/secrets.toml.example template for Streamlit Cloud secrets

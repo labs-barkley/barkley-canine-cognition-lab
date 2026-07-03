@@ -28,7 +28,7 @@ This repository is the main public hub for the Barkley Canine Cognition Lab. It 
 | [Barkley Reference Architecture](https://github.com/labs-barkley/barkley-reference-architecture) | Source-available computational backbone — runnable research demonstrator |
 | [Framework Paper](https://zenodo.org/records/20060327) | Conceptual foundation — DOI: [10.5281/zenodo.20060327](https://doi.org/10.5281/zenodo.20060327) |
 | [Neo4j DogGraph Demo](./neo4j-doggraph-demo) | Graph-native representation of DogGraph — Proof of Usefulness / Neo4j track |
-| [DogGraph Live App](https://barkley-doggraph.streamlit.app/) | Streamlit deployment of the Neo4j demo, Aura-connected, with the schema-constrained GraphRAG layer enabled |
+| [DogGraph Live App](https://doggraph.getbarkley.com/) | Self-hosted (Neo4j Community + Streamlit + Caddy) with the schema-constrained GraphRAG layer enabled |
 
 ---
 ## The One Figure to Understand Barkley
