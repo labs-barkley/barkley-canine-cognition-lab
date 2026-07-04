@@ -2,14 +2,16 @@
 Barkley DogGraph — Streamlit app (v4 · chat + artifact pane)
 ============================================================
 The behavioral memory layer, presented the way a VC already knows:
-a chat on the left (question at the bottom, answer typing itself out),
-and an artifact pane on the right (the generated Cypher in a jSite window,
-raw results beneath). Familiar first; novel second.
+a chat-style exchange (question with a user icon, answer typing itself out
+under the Barkley halo) and an artifact pane on the right (the generated
+Cypher in a jSite window, raw results beneath). One exchange at a time —
+a new question replaces the previous one. No free-text field: the questions
+are curated, audited, and always work.
 
 Page architecture:
   1. Header: halo · wordmark · CTA → getbarkley.com · the claim + chain
   2. H2 The difference, in ten seconds — card | card | paragraph (thirds)
-  3. H2 Run the graph — chat (suggested questions as chips, free-form input)
+  3. H2 Pick a question to run the graph — chips + single chat exchange
      + artifact pane (Cypher jSite window, raw results)
   4. Glossary — three canonical definitions, one per column
   5. H2 Under the hood — v9 figures + pipeline + safety
@@ -37,9 +39,6 @@ st.set_page_config(
 if hasattr(st, "logo"):
     st.logo(HALO_URL, link="https://getbarkley.com")
 
-MAX_FREEFORM_PER_SESSION = 15
-
-
 # --------------------------------------------------------------------------- #
 # Secrets / env
 # --------------------------------------------------------------------------- #
@@ -64,6 +63,8 @@ def _have_db() -> bool:
 
 
 def _have_llm() -> bool:
+    # Kept for the synthesis layer (grounded answers); no free-form input is
+    # exposed in the UI — curated, audited questions only.
     return bool(_get_secret("ANTHROPIC_API_KEY"))
 
 
@@ -191,9 +192,6 @@ def _cached_curated(question: str) -> dict:
     return _backend().answer_curated(question, c["cypher"], c["note"]).to_dict()
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
-def _cached_freeform(question: str) -> dict:
-    return _backend().answer_llm(question, prefer_llm=True).to_dict()
 
 
 # --------------------------------------------------------------------------- #
@@ -384,10 +382,12 @@ st.markdown(
 # --------------------------------------------------------------------------- #
 # 3 · Run the graph — chat + artifact pane
 # --------------------------------------------------------------------------- #
-st.markdown('<h2 class="bk-h2">Run <span class="bk-acc">the graph.</span></h2>', unsafe_allow_html=True)
+st.markdown(
+    '<h2 class="bk-h2">Pick a question <span class="bk-acc">to run the graph.</span></h2>',
+    unsafe_allow_html=True,
+)
 
-db_ok, llm_ok = _have_db(), _have_llm()
-chat = st.session_state.setdefault("chat", [])   # [{q, res, note, streamed}]
+db_ok = _have_db()
 pending: str | None = None
 
 # First visit: the flagship question asks itself.
@@ -399,72 +399,56 @@ if "booted" not in st.session_state:
 col_chat, col_art = st.columns([1.35, 1], gap="large")
 
 with col_chat:
-    # Suggested questions — chat-style chips (a dropdown fallback if pills
-    # aren't available). Every suggestion is a curated, audited query.
+    # Curated questions as chips — every one is an audited query. No free-text
+    # field: a box that can't answer arbitrary questions only frustrates.
     st.session_state.setdefault("pill_gen", 0)
     if hasattr(st, "pills"):
         picked = st.pills(
-            "Suggested questions — every one always works:",
+            "questions",
             options=[c["q"] for c in CURATED],
             selection_mode="single",
             key=f"pills_{st.session_state['pill_gen']}",
+            label_visibility="collapsed",
         )
         if picked:
             pending = picked
             st.session_state["pill_gen"] += 1   # reset chips on next run
     else:
-        sel = st.selectbox("Suggested questions:", ["—"] + [c["q"] for c in CURATED])
+        sel = st.selectbox("questions", ["—"] + [c["q"] for c in CURATED],
+                           label_visibility="collapsed")
         if sel != "—" and st.button("Run", type="primary"):
             pending = sel
 
-    typed = st.chat_input("…or ask your own (LLM → read-only Cypher)")
-    if typed and typed.strip():
-        pending = typed.strip()
-
-    # ---- handle the pending question ----
+    # ---- handle the pending question: ONE exchange, replaced each time ----
     if pending:
         if not db_ok:
             st.error("Neo4j credentials missing — see deploy/DEPLOY.md.")
-        elif pending in CURATED_BY_Q:
-            res = _cached_curated(pending)
-            chat.append({"q": pending, "res": res,
-                         "note": CURATED_BY_Q[pending]["note"], "streamed": False})
-        elif not llm_ok:
-            st.info("Free-form questions need the LLM translator (ANTHROPIC_API_KEY).")
-        elif st.session_state.get("ff_count", 0) >= MAX_FREEFORM_PER_SESSION:
-            st.warning(
-                f"{MAX_FREEFORM_PER_SESSION} free-form questions reached for this session — "
-                "thanks for stress-testing the GraphRAG layer! Refresh for a new session, "
-                "or write to labs@getbarkley.com."
-            )
         else:
-            st.session_state["ff_count"] = st.session_state.get("ff_count", 0) + 1
-            with st.spinner("Translating → validating → querying → grounding…"):
-                try:
-                    res = _cached_freeform(pending)
-                    chat.append({"q": pending, "res": res,
-                                 "note": res.get("note", ""), "streamed": False})
-                except Exception as exc:
-                    st.error(f"Error: {exc}")
+            res = _cached_curated(pending)
+            st.session_state["current"] = {
+                "q": pending, "res": res,
+                "note": CURATED_BY_Q[pending]["note"], "streamed": False,
+            }
 
-    # ---- render the conversation (answer types itself out once) ----
-    for i, turn in enumerate(chat[-6:]):
+    # ---- render the single current exchange (answer types itself out once) ----
+    current = st.session_state.get("current")
+    if current:
         with st.chat_message("user"):
-            st.markdown(turn["q"])
+            st.markdown(current["q"])
         with st.chat_message("assistant", avatar=HALO_URL):
-            answer = turn["res"]["answer"] or f"_{turn['res'].get('note') or 'No answer.'}_"
-            is_last = (i == len(chat[-6:]) - 1)
-            if is_last and not turn.get("streamed"):
+            answer = current["res"]["answer"] or f"_{current['res'].get('note') or 'No answer.'}_"
+            if not current.get("streamed"):
                 st.write_stream(_stream_words(answer))
-                turn["streamed"] = True
+                current["streamed"] = True
             else:
                 st.markdown(answer)
-            if turn.get("note") and turn["res"].get("mode") == "curated":
-                st.caption(turn["note"])
+            if current.get("note"):
+                st.caption(current["note"])
 
 with col_art:
-    if chat:
-        last = chat[-1]["res"]
+    current = st.session_state.get("current")
+    if current:
+        last = current["res"]
         if last.get("cypher"):
             status = (
                 '<span class="br">⎇ read-only</span>'
