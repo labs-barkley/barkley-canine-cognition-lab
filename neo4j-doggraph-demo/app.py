@@ -327,11 +327,6 @@ h2.bk-h2 .bk-acc{font-size:1.04em}
   background:linear-gradient(120deg,#7b9fff,#c97bff);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .bk-lead{font-size:1.02rem;line-height:1.65;color:rgba(237,235,228,.64);max-width:56rem;margin:0 0 .6rem}
-.bk-moat{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.18rem;line-height:1.5;
-  color:rgba(237,235,228,.78);max-width:56rem;margin:.9rem 0 .2rem}
-.bk-punch{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.22rem;line-height:1.4;
-  color:#edebe4;margin:0 0 .7rem}
-
 .bk-pillar{display:flex;align-items:baseline;gap:.6rem;margin:.9rem 0 0}
 .bk-ptag{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.1em}
 .bk-pillar-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:.92rem;
@@ -448,7 +443,9 @@ st.markdown(
     </div>
     <div class="bk-kicker">Behavioral memory layer · Live GraphRAG demo · Synthetic data</div>
     <h1 class="bk-h1">The memory that makes a dog <span class="bk-acc">more than an average.</span></h1>
-    <p class="bk-lead"><b>DogGraph is Barkley's behavioral memory layer.</b> It does not detect drift;
+    <p class="bk-lead"><b>Every new day makes every previous day more valuable.
+    Behavior accumulates. So does the moat.</b></p>
+    <p class="bk-lead">DogGraph is Barkley's behavioral memory layer. It does not detect drift;
     it stores, connects, and explains validated behavioral conclusions. Most pet AI counts events —
     Barkley connects change over time:</p>
     <div class="bk-chain">
@@ -459,8 +456,6 @@ st.markdown(
       <span class="bk-node">route</span><span class="bk-edge"></span>
       <span class="bk-node">compatibility</span>
     </div>
-    <p class="bk-moat">Every new day makes every previous day more valuable.
-    Behavior accumulates. <span class="bk-acc">So does the moat.</span></p>
     ''',
     unsafe_allow_html=True,
 )
@@ -639,6 +634,8 @@ st.markdown(
 # 5 · Under the hood — figures + pipeline + safety, at the end
 # --------------------------------------------------------------------------- #
 st.markdown('<h2 class="bk-h2">Under <span class="bk-acc">the hood.</span></h2>', unsafe_allow_html=True)
+st.markdown('<p class="bk-lead"><b>Inference is disposable. Behavioral memory compounds.</b></p>',
+            unsafe_allow_html=True)
 here = os.path.dirname(os.path.abspath(__file__))
 c1, c2 = st.columns(2, gap="large")
 with c1:
@@ -675,7 +672,6 @@ with c3:
 with c4:
     st.markdown(
         '<div class="bk-honest">'
-        '<p class="bk-punch">Inference is disposable. <span class="bk-acc">Behavioral memory compounds.</span></p>'
         '<p><b>Honest by construction.</b> The LLM is an interface, not a reasoning engine: '
         'retrieval is the graph traversal, generation is grounded in the retrieved rows, '
         'and no write can ever reach the database — prompt rule, keyword validator, and a '
