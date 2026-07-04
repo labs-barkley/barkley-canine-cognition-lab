@@ -197,6 +197,12 @@ of silence, state-aware route recommendation, and explained social compatibility
 all traversals over one connected behavioral memory. Adding the LLM/GraphRAG layer
 makes this conversational without giving up auditability or read-only safety.
 
+**Where's the detection?** Deliberately not here. Drift detection happens in the
+[Barkley Reference Architecture](https://github.com/labs-barkley/barkley-reference-architecture);
+DogGraph is the behavioral **memory layer** it writes to — the baselines, the
+detected drifts, and the context that explains them. This demo stores conclusions,
+not methods.
+
 ---
 
 ## Files

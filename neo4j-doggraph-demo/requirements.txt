@@ -10,6 +10,6 @@
 
 neo4j>=5.0
 anthropic>=0.40.0
-streamlit>=1.30
+streamlit>=1.36
 networkx>=3.0
 matplotlib>=3.7

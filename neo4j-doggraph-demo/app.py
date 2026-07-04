@@ -46,15 +46,32 @@ import streamlit as st
 # --------------------------------------------------------------------------- #
 # Page config — must be the very first Streamlit call
 # --------------------------------------------------------------------------- #
+HALO_URL = "https://getbarkley.com/images/Barkley_Halo_512x512.png"
+
 st.set_page_config(
     page_title="Barkley DogGraph",
-    page_icon="🐕",
+    page_icon=HALO_URL,
     layout="wide",
     initial_sidebar_state="expanded",
 )
+if hasattr(st, "logo"):
+    st.logo(HALO_URL, link="https://getbarkley.com")
 
 # Soft per-session cap on questions (public demo wired to a real API key).
 MAX_QUESTIONS_PER_SESSION = 25
+
+# Preset questions — realistic scenarios anyone (a VC, an owner, a CTO) might
+# ask. The first four map to the audited deterministic intents; the rest are
+# handled by the schema-constrained LLM translator.
+PRESETS = [
+    "Which dogs are drifting from their baseline?",
+    "Is Kikoo's drift explained by context, or unexplained?",
+    "Which dog needs attention first, and why?",
+    "Which route is recommended for Kikoo and why?",
+    "Who is the most socially compatible dog with Kikoo?",
+    "Which dogs are stable — no drift at all?",
+    "Show Kikoo's baseline profile across all channels.",
+]
 
 
 # --------------------------------------------------------------------------- #
@@ -96,15 +113,29 @@ def _backend():
     return answer_llm
 
 
+# Answers are cached server-wide for an hour: repeated questions (and the
+# auto-demo every visitor sees) cost one LLM round-trip per hour, not one per
+# click. The graph is static synthetic data, so staleness is a non-issue.
+@st.cache_data(ttl=3600, show_spinner=False)
+def _cached_answer(question: str, prefer_llm: bool) -> dict:
+    return _backend()(question, prefer_llm=prefer_llm).to_dict()
+
+
 # --------------------------------------------------------------------------- #
 # Header
 # --------------------------------------------------------------------------- #
-st.title("🐕 Barkley DogGraph")
+st.title("Barkley DogGraph")
+st.markdown(
+    "Most pet tech asks *“is this dog normal for its breed?”* Barkley asks "
+    "**“is this dog still itself?”** This live demo is the memory behind that "
+    "question: six synthetic dogs, each with its **own baseline**, its detected "
+    "**drift**, and the **context** that explains it — stored as a graph you can "
+    "ask in plain English."
+)
 st.caption(
-    "Behavioral intelligence as a Neo4j property graph. Ask in natural language — "
-    "an LLM emits schema-constrained, read-only Cypher; the graph answers; the LLM "
-    "synthesizes a grounded reply. Synthetic data · research demonstrator · "
-    "not a diagnostic tool."
+    "Under the hood: an LLM turns your question into schema-constrained, read-only "
+    "Cypher; the graph answers; the reply is grounded in the retrieved rows. "
+    "Synthetic data · research demonstrator · not a diagnostic tool."
 )
 
 
@@ -124,20 +155,31 @@ with st.sidebar:
                  caption="Seeded graph (six synthetic dogs · Kikoo highlighted)")
 
     st.divider()
-    st.subheader("Try a preset")
-    presets = [
-        "Which dogs are drifting from their baseline?",
-        "Is Kikoo's drift explained by context, or unexplained?",
-        "Which route is recommended for Kikoo and why?",
-        "Who is the most socially compatible dog with Kikoo?",
-    ]
-    for p in presets:
-        if st.button(p, use_container_width=True, key=f"preset_{abs(hash(p))}"):
+    st.subheader("Ask a real question")
+    for i, p in enumerate(PRESETS):
+        if st.button(p, use_container_width=True, key=f"preset_{i}"):
             st.session_state["question"] = p
+            st.session_state["auto_run"] = True
+
+    st.divider()
+    with st.expander("What the words mean"):
+        st.markdown(
+            "**Individual Baseline** — a per-individual longitudinal norm learned "
+            "from that individual's own history, used as the reference frame for "
+            "detecting change instead of a population average.\n\n"
+            "**Behavioral Drift** — a slow, cumulative divergence of an individual's "
+            "behavior away from its own baseline — typically invisible to population "
+            "statistics because each step remains within the population's normal range.\n\n"
+            "**Reference Frame** — the comparison standard a model uses to decide "
+            "whether a behavior is normal; the same data can yield opposite "
+            "conclusions under different reference frames.\n\n"
+            "Full canonical glossary → [getbarkley.com/llms.txt](https://getbarkley.com/llms.txt)"
+        )
 
     st.divider()
     st.subheader("About")
     st.markdown(
+        "- Site: [getbarkley.com](https://getbarkley.com)  \n"
         "- Repo: [`labs-barkley/barkley-canine-cognition-lab`](https://github.com/labs-barkley/barkley-canine-cognition-lab/tree/main/neo4j-doggraph-demo)  \n"
         "- Drift demo: [drift-explorer.getbarkley.com](https://drift-explorer.getbarkley.com)  \n"
         "- Dataset: [🤗 synthetic-doggraph-sample](https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample)  \n"
@@ -149,6 +191,15 @@ with st.sidebar:
 # --------------------------------------------------------------------------- #
 # Input area + mode toggle + status
 # --------------------------------------------------------------------------- #
+# First visit: run the flagship question automatically so the demo proves its
+# value in five seconds, before anyone reads a word. Served from the global
+# answer cache, so it does not multiply LLM cost per visitor.
+if "booted" not in st.session_state:
+    st.session_state["booted"] = True
+    if _have_db():
+        st.session_state["question"] = PRESETS[0]
+        st.session_state["auto_run"] = True
+
 question = st.text_input(
     "Ask the DogGraph in natural language:",
     value=st.session_state.get("question", ""),
@@ -170,6 +221,9 @@ with col_a:
     )
 with col_b:
     submit = st.button("Ask the graph", type="primary", use_container_width=True)
+
+# Preset clicks and the first-load auto-demo submit themselves.
+submit = submit or st.session_state.pop("auto_run", False)
 
 # Status bar
 db_ok  = _have_db()
@@ -209,8 +263,7 @@ if submit and question.strip():
 
         with st.spinner("Querying the graph…"):
             try:
-                answer_llm = _backend()
-                result = answer_llm(question, prefer_llm=prefer_llm)
+                result = _cached_answer(question, prefer_llm)
             except Exception as exc:
                 st.error(f"Error: {exc}")
                 st.stop()
@@ -218,51 +271,86 @@ if submit and question.strip():
         st.markdown("---")
 
         # GraphRAG synthesized answer — surfaced first
-        st.subheader("🐕 Answer")
-        if result.answer:
-            st.markdown(result.answer)
+        st.subheader("Answer")
+        if result["answer"]:
+            st.markdown(result["answer"])
         else:
-            st.info(result.note or "(No answer synthesized.)")
+            st.info(result["note"] or "(No answer synthesized.)")
 
         # Generated Cypher + raw rows side-by-side
         c1, c2 = st.columns([1, 1])
         with c1:
             st.subheader("Generated Cypher")
-            if result.cypher:
-                st.code(result.cypher, language="cypher")
+            if result["cypher"]:
+                st.code(result["cypher"], language="cypher")
             else:
                 st.caption("_No Cypher was emitted (out of scope or refused)._")
-            st.caption(f"Mode: `{result.mode}`")
-            if result.note and result.answer:
+            st.caption(f"Mode: `{result['mode']}`")
+            if result["note"] and result["answer"]:
                 # Already showed the note above when no answer; show alongside otherwise
-                st.caption(result.note)
+                st.caption(result["note"])
         with c2:
             st.subheader("Raw results")
-            if result.rows:
-                st.dataframe(result.rows, use_container_width=True, hide_index=True)
-                st.caption(f"{len(result.rows)} row(s)")
+            if result["rows"]:
+                st.dataframe(result["rows"], use_container_width=True, hide_index=True)
+                st.caption(f"{len(result['rows'])} row(s)")
             else:
                 st.caption("_No rows returned._")
+
+        # Plain-language footer: why this answer looks the way it does.
+        st.caption(
+            "Every number above came out of the graph — the model is only allowed "
+            "to phrase what was retrieved. Drift detection itself happens in the "
+            "[Barkley Reference Architecture](https://github.com/labs-barkley/barkley-reference-architecture); "
+            "DogGraph is the behavioral memory it writes to."
+        )
 
 elif submit and not question.strip():
     st.warning("Please enter a question.")
 
 else:
-    # Idle / first-load explainer
+    # Idle / first-load explainer — the difference, in ten seconds.
     st.markdown("---")
-    st.subheader("What you can ask")
+    st.subheader("The difference, in ten seconds")
+    ca, cb = st.columns(2)
+    with ca:
+        st.markdown(
+            "**The breed average says: fine.**  \n"
+            "Kikoo's activity sits inside the normal range for a Jack Russell "
+            "Terrier. A population model sees nothing. *No alert.*"
+        )
+    with cb:
+        st.markdown(
+            "**Kikoo's own baseline says: look.**  \n"
+            "Compared to *his own* history, Kikoo moves less, recovers slower, "
+            "and goes quiet more often. *Drift detected — weeks earlier.*"
+        )
     st.markdown(
-        "- Which dogs are drifting, and from which baselines?\n"
-        "- For a given dog, is the drift **explained by context** (vet visit, "
-        "  schedule change) or unexplained?\n"
-        "- Which route is recommended for a dog, and why?\n"
-        "- Compatibility scores between dogs.\n"
-        "- Cross-resolution counts (events per temporal bin or channel)."
+        "Same dog. Same data. **Different reference — different conclusion.** "
+        "This graph is the memory that makes the second answer possible: each "
+        "dog's baseline, its drift, and the context that explains it, stored as "
+        "relationships you can question."
+    )
+
+    st.subheader("Questions this graph can answer")
+    st.markdown(
+        "- *Which dogs are drifting from their own baseline?* — the core question "
+        "a flat tracker can't ask.\n"
+        "- *Is that drift explained?* — a vet visit or a heatwave is context, not "
+        "an alarm; **unexplained** drift is what earns a closer look.\n"
+        "- *Which dog needs attention first?* — triage by drift rate and severity.\n"
+        "- *Which route fits a dog's current state?* — a drifting dog gets a calmer "
+        "route, with the reasoning attached.\n"
+        "- *Who should Kikoo play with?* — compatibility as a scored, explained "
+        "relationship, not a guess."
     )
     st.caption(
         "The LLM is constrained to the DogGraph schema and emits **only read-only "
-        "Cypher**, validated by a forbidden-keyword scanner before execution. "
-        "Questions outside the schema return a graceful refusal."
+        "Cypher**, checked by a validator and executed in a server-enforced read "
+        "transaction. Questions outside the schema return a graceful refusal. "
+        "Drift detection itself happens in the "
+        "[Barkley Reference Architecture](https://github.com/labs-barkley/barkley-reference-architecture) — "
+        "DogGraph is the behavioral memory it writes to."
     )
 
 

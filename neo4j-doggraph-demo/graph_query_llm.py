@@ -287,18 +287,28 @@ def run_cypher(cypher: str, params: dict | None = None) -> list[dict]:
     """
     validate_readonly(cypher)
     cypher = enforce_limit(cypher)
-    drv = _neo_driver()
-    try:
-        with drv.session() as s:
-            def _work(tx):
-                return [
-                    {k: rec[k] for k in rec.keys()}
-                    for rec in tx.run(cypher, **(params or {}))
-                ]
-            rows = s.execute_read(_work)
-    finally:
-        drv.close()
+    drv = _get_driver()
+    with drv.session() as s:
+        def _work(tx):
+            return [
+                {k: rec[k] for k in rec.keys()}
+                for rec in tx.run(cypher, **(params or {}))
+            ]
+        rows = s.execute_read(_work)
     return rows
+
+
+# Lazy driver singleton — a Neo4j driver is a connection *pool* meant to live
+# for the process lifetime. Opening/closing one per query added a full TLS
+# handshake to every question.
+_DRIVER = None
+
+
+def _get_driver():
+    global _DRIVER
+    if _DRIVER is None:
+        _DRIVER = _neo_driver()
+    return _DRIVER
 
 
 # --------------------------------------------------------------------------- #
