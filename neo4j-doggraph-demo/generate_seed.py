@@ -54,7 +54,12 @@ CONTEXT_TYPES = {
     "low_activity_period": "Reduced movement window confirmed by a second channel (informative silence).",
     "post_surgery_recovery": "Known clinical recovery period — expected, context-explained change.",
     "collar_removed_grooming": "Collar removed for grooming — artefactual gap, not behavioral.",
+    "high_noise_exposure": "Yesterday's route crossed a high-noise area — construction near Oak Hill Meadow.",
 }
+
+# Contexts emitted even when no dog's primary drift references them
+# (the Marlow scenario attaches high_noise_exposure as a second modulator).
+EXTRA_CONTEXTS = ["high_noise_exposure"]
 
 
 def esc(s: str) -> str:
@@ -89,7 +94,7 @@ def emit() -> str:
     w("")
 
     # ---- Context events (only the ones referenced) ----
-    referenced = {d[6] for d in DOGS if d[6]}
+    referenced = {d[6] for d in DOGS if d[6]} | set(EXTRA_CONTEXTS)
     w("// --- Context events (missingness / situational taxonomy) ---")
     for i, ctype in enumerate(sorted(referenced)):
         cid = f"ctx_{ctype}"
@@ -141,12 +146,20 @@ def emit() -> str:
                   f"MERGE (dr)-[:MODULATED_BY]->(c);")
         w("")
 
+    # ---- Scenario: yesterday's noise exposure during Marlow's recovery ----
+    # Route crossed a high-noise area -> recovery remained incomplete ->
+    # compatibility score dropped -> alternative route recommended.
+    w("// --- Scenario: yesterday's noise exposure during Marlow's recovery ---")
+    w("MATCH (dr:DriftEvent {id:'drift_d_marlow'}), (c:ContextEvent {id:'ctx_high_noise_exposure'}) "
+      "MERGE (dr)-[:MODULATED_BY]->(c);")
+    w("")
+
     # ---- Route recommendations (state-aware) ----
     w("// --- Route recommendations (matched to current behavioral state) ---")
     # Kikoo is drifting high -> recommend the calm, flat River Path (low intensity)
     recs = [
         ("d_kikoo",  "r_river", "Low-intensity flat route suits an elevated-drift, lower-activity state."),
-        ("d_marlow", "r_quiet", "Quietest route during a context-explained recovery period."),
+        ("d_marlow", "r_quiet", "Quietest route during recovery — avoids the high-noise area crossed yesterday."),
         ("d_sable",  "r_ridge", "High-intensity loop fits a stable, high-energy baseline."),
         ("d_pixel",  "r_ridge", "Stable baseline; can handle hilly terrain."),
     ]
@@ -158,15 +171,18 @@ def emit() -> str:
     # ---- Social compatibility (PPA-02 social compatibility + Data Value Index) ----
     w("// --- Social compatibility (directed edges with score + reason) ---")
     compat = [
-        ("d_kikoo",  "d_ollie",  0.86, "Complementary arousal profiles; overlapping calm-activity windows."),
-        ("d_kikoo",  "d_sable",  0.34, "Mismatched intensity; Sable's high drive overwhelms Kikoo's current state."),
-        ("d_juno",   "d_sable",  0.78, "Both high-energy, compatible play tempo."),
-        ("d_pixel",  "d_ollie",  0.71, "Similar low-reactivity social latency."),
-        ("d_marlow", "d_ollie",  0.69, "Gentle pairing suitable during recovery."),
+        # a,        b,          score, reason, previous_score (None = stable score)
+        ("d_kikoo",  "d_ollie",  0.86, "Complementary arousal profiles; overlapping calm-activity windows.", None),
+        ("d_kikoo",  "d_sable",  0.34, "Mismatched intensity; Sable's high drive overwhelms Kikoo's current state.", None),
+        ("d_kikoo",  "d_marlow", 0.38, "Score dropped after yesterday's high-noise exposure — Marlow's post-surgery recovery remains incomplete.", 0.72),
+        ("d_juno",   "d_sable",  0.78, "Both high-energy, compatible play tempo.", None),
+        ("d_pixel",  "d_ollie",  0.71, "Similar low-reactivity social latency.", None),
+        ("d_marlow", "d_ollie",  0.69, "Gentle pairing suitable during recovery.", None),
     ]
-    for a, b, score, reason in compat:
+    for a, b, score, reason, prev in compat:
+        prev_prop = f", c.previous_score={prev}" if prev is not None else ""
         w(f"MATCH (a:Dog {{id:'{a}'}}), (b:Dog {{id:'{b}'}}) "
-          f"MERGE (a)-[c:COMPATIBLE_WITH]->(b) SET c.score={score}, c.reason='{esc(reason)}';")
+          f"MERGE (a)-[c:COMPATIBLE_WITH]->(b) SET c.score={score}, c.reason='{esc(reason)}'{prev_prop};")
     w("")
     w("// End of synthetic seed.")
     return "\n".join(L) + "\n"
@@ -174,7 +190,7 @@ def emit() -> str:
 
 if __name__ == "__main__":
     cypher = emit()
-    with open("seed_synthetic.cypher", "w") as f:
+    with open("seed_synthetic.cypher", "w", encoding="utf-8") as f:
         f.write(cypher)
     lines = cypher.count("\n")
     stmts = cypher.count(";")

@@ -21,6 +21,7 @@ MATCH (r:Route {id:'r_ridge'}), (l:Location {id:'loc_oakhill'}) MERGE (r)-[:LOCA
 MATCH (r:Route {id:'r_quiet'}), (l:Location {id:'loc_quiet'}) MERGE (r)-[:LOCATED_NEAR]->(l);
 
 // --- Context events (missingness / situational taxonomy) ---
+MERGE (:ContextEvent {id: 'ctx_high_noise_exposure', type: 'high_noise_exposure', description: 'Yesterday\'s route crossed a high-noise area — construction near Oak Hill Meadow.'});
 MERGE (:ContextEvent {id: 'ctx_low_activity_period', type: 'low_activity_period', description: 'Reduced movement window confirmed by a second channel (informative silence).'});
 MERGE (:ContextEvent {id: 'ctx_post_surgery_recovery', type: 'post_surgery_recovery', description: 'Known clinical recovery period — expected, context-explained change.'});
 
@@ -119,15 +120,19 @@ MERGE (e:BehaviorEvent {id: 'ev_d_ollie_2'}) SET e.day=180, e.channel='restlessn
 MATCH (d:Dog {id:'d_ollie'}), (e:BehaviorEvent {id:'ev_d_ollie_2'}) MERGE (d)-[:GENERATED]->(e);
 MATCH (e:BehaviorEvent {id:'ev_d_ollie_2'}), (t:TemporalBin {id:'bin_quarterly'}) MERGE (e)-[:FALLS_IN]->(t);
 
+// --- Scenario: yesterday's noise exposure during Marlow's recovery ---
+MATCH (dr:DriftEvent {id:'drift_d_marlow'}), (c:ContextEvent {id:'ctx_high_noise_exposure'}) MERGE (dr)-[:MODULATED_BY]->(c);
+
 // --- Route recommendations (matched to current behavioral state) ---
 MATCH (d:Dog {id:'d_kikoo'}), (r:Route {id:'r_river'}) MERGE (d)-[rr:RECOMMENDED_ROUTE]->(r) SET rr.reason='Low-intensity flat route suits an elevated-drift, lower-activity state.';
-MATCH (d:Dog {id:'d_marlow'}), (r:Route {id:'r_quiet'}) MERGE (d)-[rr:RECOMMENDED_ROUTE]->(r) SET rr.reason='Quietest route during a context-explained recovery period.';
+MATCH (d:Dog {id:'d_marlow'}), (r:Route {id:'r_quiet'}) MERGE (d)-[rr:RECOMMENDED_ROUTE]->(r) SET rr.reason='Quietest route during recovery — avoids the high-noise area crossed yesterday.';
 MATCH (d:Dog {id:'d_sable'}), (r:Route {id:'r_ridge'}) MERGE (d)-[rr:RECOMMENDED_ROUTE]->(r) SET rr.reason='High-intensity loop fits a stable, high-energy baseline.';
 MATCH (d:Dog {id:'d_pixel'}), (r:Route {id:'r_ridge'}) MERGE (d)-[rr:RECOMMENDED_ROUTE]->(r) SET rr.reason='Stable baseline; can handle hilly terrain.';
 
 // --- Social compatibility (directed edges with score + reason) ---
 MATCH (a:Dog {id:'d_kikoo'}), (b:Dog {id:'d_ollie'}) MERGE (a)-[c:COMPATIBLE_WITH]->(b) SET c.score=0.86, c.reason='Complementary arousal profiles; overlapping calm-activity windows.';
 MATCH (a:Dog {id:'d_kikoo'}), (b:Dog {id:'d_sable'}) MERGE (a)-[c:COMPATIBLE_WITH]->(b) SET c.score=0.34, c.reason='Mismatched intensity; Sable\'s high drive overwhelms Kikoo\'s current state.';
+MATCH (a:Dog {id:'d_kikoo'}), (b:Dog {id:'d_marlow'}) MERGE (a)-[c:COMPATIBLE_WITH]->(b) SET c.score=0.38, c.reason='Score dropped after yesterday\'s high-noise exposure — Marlow\'s post-surgery recovery remains incomplete.', c.previous_score=0.72;
 MATCH (a:Dog {id:'d_juno'}), (b:Dog {id:'d_sable'}) MERGE (a)-[c:COMPATIBLE_WITH]->(b) SET c.score=0.78, c.reason='Both high-energy, compatible play tempo.';
 MATCH (a:Dog {id:'d_pixel'}), (b:Dog {id:'d_ollie'}) MERGE (a)-[c:COMPATIBLE_WITH]->(b) SET c.score=0.71, c.reason='Similar low-reactivity social latency.';
 MATCH (a:Dog {id:'d_marlow'}), (b:Dog {id:'d_ollie'}) MERGE (a)-[c:COMPATIBLE_WITH]->(b) SET c.score=0.69, c.reason='Gentle pairing suitable during recovery.';

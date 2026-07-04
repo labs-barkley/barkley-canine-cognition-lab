@@ -86,6 +86,22 @@ CURATED = [
                  "him to himself: his own baseline, and a measured drift away from it."),
     },
     {
+        "q": "Why shouldn't Kikoo meet Marlow tomorrow?",
+        "cypher": (
+            "MATCH (k:Dog {name:'Kikoo'})-[c:COMPATIBLE_WITH]->(m:Dog {name:'Marlow'})\n"
+            "MATCH (m)-[:HAS_DRIFT]->(x:DriftEvent)-[:MODULATED_BY]->(ctx:ContextEvent)\n"
+            "OPTIONAL MATCH (m)-[rr:RECOMMENDED_ROUTE]->(r:Route)\n"
+            "RETURN m.name AS dog, c.previous_score AS score_before, c.score AS score_now,\n"
+            "       c.reason AS compatibility_reason, x.rate AS drift_rate, x.severity AS severity,\n"
+            "       collect(ctx.description) AS explained_by,\n"
+            "       r.name AS alternative_route, rr.reason AS route_reason"
+        ),
+        "note": ("Four hops, one answer: yesterday's route crossed a high-noise area → "
+                 "recovery remained incomplete → the compatibility score dropped → an "
+                 "alternative route is recommended. That causal chain is native to a "
+                 "graph — and invisible to a table of snapshots."),
+    },
+    {
         "q": "Which dogs are drifting from their own baseline?",
         "cypher": (
             "MATCH (d:Dog)-[:HAS_DRIFT]->(x:DriftEvent)-[:DRIFTED_FROM]->(:Baseline)\n"
@@ -229,6 +245,10 @@ h2.bk-h2 .bk-acc{font-size:1.04em}
   background:linear-gradient(120deg,#7b9fff,#c97bff);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .bk-lead{font-size:1.02rem;line-height:1.65;color:rgba(237,235,228,.64);max-width:56rem;margin:0 0 .6rem}
+.bk-moat{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.18rem;line-height:1.5;
+  color:rgba(237,235,228,.78);max-width:56rem;margin:.9rem 0 .2rem}
+.bk-punch{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.22rem;line-height:1.4;
+  color:#edebe4;margin:0 0 .7rem}
 .bk-lead b{color:#edebe4;font-weight:600}
 
 .bk-chain{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem .3rem;margin:1rem 0 .4rem}
@@ -352,6 +372,8 @@ st.markdown(
       <span class="bk-node">route</span><span class="bk-edge"></span>
       <span class="bk-node">compatibility</span>
     </div>
+    <p class="bk-moat">Every new day makes every previous day more valuable.
+    Behavior accumulates. <span class="bk-acc">So does the moat.</span></p>
     ''',
     unsafe_allow_html=True,
 )
@@ -543,6 +565,7 @@ with c3:
 with c4:
     st.markdown(
         '<div class="bk-honest">'
+        '<p class="bk-punch">Inference is disposable. <span class="bk-acc">Behavioral memory compounds.</span></p>'
         '<p><b>Honest by construction.</b> The LLM is an interface, not a reasoning engine: '
         'retrieval is the graph traversal, generation is grounded in the retrieved rows, '
         'and no write can ever reach the database — prompt rule, keyword validator, and a '
@@ -559,7 +582,8 @@ with c4:
     )
 
 st.markdown(
-    '<div class="bk-foot">© 2026 Barkley AI · synthetic data · patent applications filed · '
+    '<div class="bk-foot">DogGraph stores conclusions, not methods.<br>'
+    '© 2026 Barkley AI · synthetic data · patent applications filed · '
     'not a diagnostic tool · <a href="https://getbarkley.com" target="_blank">getbarkley.com</a></div>',
     unsafe_allow_html=True,
 )
