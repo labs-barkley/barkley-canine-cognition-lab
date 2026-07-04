@@ -1,7 +1,7 @@
 {
   "name": "barkley-drift-explorer",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "description": "Front-end-only demonstrator: a dog can remain normal for its breed while drifting from its own individual baseline.",
   "scripts": {
