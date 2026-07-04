@@ -277,8 +277,13 @@ h2.bk-h2 .bk-acc{font-size:1.04em}
   font-size:.88rem;line-height:1.6;color:rgba(237,235,228,.56)}
 .bk-gloss b{display:block;color:#edebe4;font-weight:600;font-family:'Inter Tight',sans-serif;
   font-size:1rem;margin-bottom:.35rem}
-.bk-gloss-link{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(237,235,228,.42);margin:.2rem 0 0}
+.bk-gloss-link{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:rgba(237,235,228,.42);margin:.2rem 0 0}
 .bk-gloss-link a{color:rgba(123,159,255,.8);text-decoration:none}
+
+.bk-honest{font-size:.88rem;line-height:1.6;color:rgba(237,235,228,.56)}
+.bk-honest b{color:#edebe4;font-weight:600}
+.bk-honest a{color:rgba(123,159,255,.8);text-decoration:none}
+.bk-honest .bk-honest-links{margin-top:.8rem}
 
 div.stButton>button{border-radius:999px;font-family:'Inter Tight',sans-serif}
 div.stButton>button[kind="primary"]{background:linear-gradient(120deg,#7b9fff,#c97bff);border:none;font-weight:600}
@@ -537,16 +542,20 @@ with c3:
     )
 with c4:
     st.markdown(
-        "**Honest by construction.** The LLM is an interface, not a reasoning engine: "
-        "retrieval is the graph traversal, generation is grounded in the retrieved rows, "
-        "and no write can ever reach the database — prompt rule, keyword validator, and a "
-        "server-enforced read transaction, in depth. Drift **detection** happens in the "
-        "[Barkley Reference Architecture](https://github.com/labs-barkley/barkley-reference-architecture); "
-        "DogGraph is the behavioral memory it writes to.\n\n"
-        "- Repo: [`neo4j-doggraph-demo`](https://github.com/labs-barkley/barkley-canine-cognition-lab/tree/main/neo4j-doggraph-demo)\n"
-        "- Drift demo: [drift-explorer.getbarkley.com](https://drift-explorer.getbarkley.com)\n"
-        "- Dataset: [synthetic-doggraph-sample](https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample)\n"
-        "- ORCID: [0009-0004-6031-659X](https://orcid.org/0009-0004-6031-659X)"
+        '<div class="bk-honest">'
+        '<p><b>Honest by construction.</b> The LLM is an interface, not a reasoning engine: '
+        'retrieval is the graph traversal, generation is grounded in the retrieved rows, '
+        'and no write can ever reach the database — prompt rule, keyword validator, and a '
+        'server-enforced read transaction, in depth. Drift <b>detection</b> happens in the '
+        '<a href="https://github.com/labs-barkley/barkley-reference-architecture" target="_blank">'
+        'Barkley Reference Architecture</a>; DogGraph is the behavioral memory it writes to.</p>'
+        '<p class="bk-honest-links">'
+        'Repo: <a href="https://github.com/labs-barkley/barkley-canine-cognition-lab/tree/main/neo4j-doggraph-demo" target="_blank">neo4j-doggraph-demo</a><br>'
+        'Drift demo: <a href="https://drift-explorer.getbarkley.com" target="_blank">drift-explorer.getbarkley.com</a><br>'
+        'Dataset: <a href="https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample" target="_blank">synthetic-doggraph-sample</a><br>'
+        'ORCID: <a href="https://orcid.org/0009-0004-6031-659X" target="_blank">0009-0004-6031-659X</a></p>'
+        '</div>',
+        unsafe_allow_html=True,
     )
 
 st.markdown(
