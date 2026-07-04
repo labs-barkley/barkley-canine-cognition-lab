@@ -268,10 +268,10 @@ CURATED_BY_Q = {c["q"]: c for c in CURATED}
 FLAGSHIP_Q = CURATED[0]["q"]
 SIGNATURE_Q = next(c["q"] for c in CURATED if c["cat"] == "signature")
 PILLARS = [
-    # key,            tag,                tagline,                    accent
-    ("individual",    "// INDIVIDUAL",    "Understand the dog.",      "#7b9fff"),
-    ("relationships", "// RELATIONSHIPS", "Understand interactions.", "#a884ff"),
-    ("context",       "// CONTEXT",       "Understand why.",          "#3fd6bc"),
+    # key,            tag,                accent
+    ("individual",    "// INDIVIDUAL",    "#7b9fff"),
+    ("relationships", "// RELATIONSHIPS", "#a884ff"),
+    ("context",       "// CONTEXT",       "#3fd6bc"),
 ]
 
 
@@ -327,10 +327,29 @@ h2.bk-h2 .bk-acc{font-size:1.04em}
   background:linear-gradient(120deg,#7b9fff,#c97bff);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .bk-lead{font-size:1.02rem;line-height:1.65;color:rgba(237,235,228,.64);max-width:56rem;margin:0 0 .6rem}
-.bk-pillar{display:flex;align-items:baseline;gap:.6rem;margin:.9rem 0 0}
+.bk-pillar{display:flex;align-items:baseline;gap:.6rem;margin:0 0 .1rem}
 .bk-ptag{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.1em}
-.bk-pillar-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:.92rem;
-  color:rgba(237,235,228,.5)}
+
+/* Question cards — one bordered container per category */
+div[data-testid="stVerticalBlockBorderWrapper"]{
+  border:1px solid rgba(237,235,228,.12) !important;border-radius:14px;
+  background:rgba(237,235,228,.02)}
+
+/* Question chips: gray until selected or hovered — fast human scanning */
+div[data-testid="stButtonGroup"] button p{
+  color:rgba(237,235,228,.5) !important;font-size:.85rem;transition:color .15s}
+div[data-testid="stButtonGroup"] button:hover p{color:#edebe4 !important}
+div[data-testid="stButtonGroup"] button[data-testid="stBaseButton-pillsActive"] p{
+  color:#edebe4 !important}
+
+/* Raw results — quiet mono table */
+.bk-rows-wrap{overflow-x:auto;margin:.2rem 0 .6rem}
+.bk-rows{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;line-height:1.5}
+.bk-rows th{color:rgba(237,235,228,.42);text-align:left;font-weight:500;
+  padding:.35rem .6rem;border-bottom:1px solid rgba(237,235,228,.14);white-space:nowrap}
+.bk-rows td{color:rgba(237,235,228,.55);padding:.35rem .6rem;
+  border-bottom:1px solid rgba(237,235,228,.06);vertical-align:top}
 .bk-lead b{color:#edebe4;font-weight:600}
 
 .bk-chain{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem .3rem;margin:1rem 0 .4rem}
@@ -407,6 +426,29 @@ def cypher_html(code: str) -> str:
         r"\b(MATCH|OPTIONAL|WHERE|WITH|RETURN|ORDER|BY|LIMIT|DISTINCT|AS|CASE|WHEN|THEN|ELSE|END|NOT|AND|OR|IS|NULL|DESC|ASC)\b",
         r'<span class="k">\1</span>', c)
     return c
+
+
+def rows_table_html(rows: list[dict]) -> str:
+    """Raw results as a quiet, stylable HTML table (st.dataframe is canvas —
+    its text can't be muted with CSS)."""
+    if not rows:
+        return ""
+    cols = list(rows[0].keys())
+
+    def fmt(v) -> str:
+        if v is None:
+            return ""
+        if isinstance(v, (list, tuple)):
+            return ", ".join(str(x) for x in v)
+        return str(v)
+
+    head = "".join(f"<th>{html.escape(c)}</th>" for c in cols)
+    body = "".join(
+        "<tr>" + "".join(f"<td>{html.escape(fmt(r.get(c)))}</td>" for c in cols) + "</tr>"
+        for r in rows
+    )
+    return (f'<div class="bk-rows-wrap"><table class="bk-rows">'
+            f"<thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>")
 
 
 def jsite_window(title: str, body_html: str, status_html: str) -> str:
@@ -499,7 +541,7 @@ st.markdown(
 db_ok = _have_db()
 pending: str | None = None
 
-PILL_KEYS = ["qp_signature"] + [f"qp_{key}" for key, _, _, _ in PILLARS]
+PILL_KEYS = ["qp_signature"] + [f"qp_{key}" for key, _, _ in PILLARS]
 
 
 def _on_pick(changed_key: str) -> None:
@@ -520,31 +562,32 @@ if "booted" not in st.session_state:
         st.session_state["pending_q"] = FLAGSHIP_Q
         st.session_state["qp_individual"] = FLAGSHIP_Q
 
-col_chat, col_art = st.columns([1.35, 1], gap="large")
+col_q, col_ans = st.columns([1, 1.4], gap="large")
 
-with col_chat:
+with col_q:
     # Human questions, grouped the way Barkley reasons — Individual,
     # Relationships, Context — plus the one every owner actually asks.
-    # No free-text field: curated, audited questions only.
+    # One card per category, answer alongside: no scrolling to read it.
     if hasattr(st, "pills"):
-        st.markdown(
-            '<div class="bk-pillar"><span class="bk-ptag" style="color:#c97bff">'
-            '// THE QUESTION EVERY OWNER ASKS</span></div>',
-            unsafe_allow_html=True,
-        )
-        st.pills("signature", options=[SIGNATURE_Q], selection_mode="single",
-                 key="qp_signature", on_change=_on_pick, args=("qp_signature",),
-                 label_visibility="collapsed")
-        for key, tag, sub, color in PILLARS:
+        with st.container(border=True):
             st.markdown(
-                f'<div class="bk-pillar"><span class="bk-ptag" style="color:{color}">{tag}</span>'
-                f'<span class="bk-pillar-sub">{sub}</span></div>',
+                '<div class="bk-pillar"><span class="bk-ptag" style="color:#c97bff">'
+                '// THE QUESTION EVERY OWNER ASKS</span></div>',
                 unsafe_allow_html=True,
             )
-            st.pills(key, options=[c["q"] for c in CURATED if c["cat"] == key],
-                     selection_mode="single", key=f"qp_{key}",
-                     on_change=_on_pick, args=(f"qp_{key}",),
+            st.pills("signature", options=[SIGNATURE_Q], selection_mode="single",
+                     key="qp_signature", on_change=_on_pick, args=("qp_signature",),
                      label_visibility="collapsed")
+        for key, tag, color in PILLARS:
+            with st.container(border=True):
+                st.markdown(
+                    f'<div class="bk-pillar"><span class="bk-ptag" style="color:{color}">{tag}</span></div>',
+                    unsafe_allow_html=True,
+                )
+                st.pills(key, options=[c["q"] for c in CURATED if c["cat"] == key],
+                         selection_mode="single", key=f"qp_{key}",
+                         on_change=_on_pick, args=(f"qp_{key}",),
+                         label_visibility="collapsed")
     else:
         sel = st.selectbox("questions", ["—"] + [c["q"] for c in CURATED],
                            label_visibility="collapsed")
@@ -555,6 +598,7 @@ with col_chat:
     if picked_pending:
         pending = picked_pending
 
+with col_ans:
     # ---- handle the pending question: ONE exchange, replaced each time ----
     if pending:
         if not db_ok:
@@ -566,7 +610,7 @@ with col_chat:
                 "note": CURATED_BY_Q[pending]["note"], "streamed": False,
             }
 
-    # ---- render the single current exchange (answer types itself out once) ----
+    # ---- the single current exchange (answer types itself out once) ----
     current = st.session_state.get("current")
     if current:
         with st.chat_message("user"):
@@ -581,9 +625,7 @@ with col_chat:
             if current.get("note"):
                 st.caption(current["note"])
 
-with col_art:
-    current = st.session_state.get("current")
-    if current:
+        # ---- the artifact, right below the answer ----
         last = current["res"]
         if last.get("cypher"):
             status = (
@@ -599,10 +641,10 @@ with col_art:
             )
         if last.get("rows"):
             st.markdown(
-                f'<div class="bk-kicker" style="margin:.2rem 0 .4rem">Raw results · {len(last["rows"])} row(s)</div>',
+                f'<div class="bk-kicker" style="margin:.6rem 0 .1rem">Raw results · {len(last["rows"])} row(s)</div>'
+                + rows_table_html(last["rows"]),
                 unsafe_allow_html=True,
             )
-            st.dataframe(last["rows"], use_container_width=True, hide_index=True)
         st.caption(
             "Every number came out of the graph — the model is only allowed to phrase "
             "what was retrieved."
