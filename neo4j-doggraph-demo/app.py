@@ -11,8 +11,10 @@ are curated, audited, and always work.
 Page architecture:
   1. Header: halo · wordmark · CTA → getbarkley.com · the claim + chain
   2. H2 The difference, in ten seconds — card | card | paragraph (thirds)
-  3. H2 Pick a question to run the graph — chips + single chat exchange
-     + artifact pane (Cypher jSite window, raw results)
+  3. H2 Pick a question to run the graph — the signature question + three
+     pillars of chips, grouped the way Barkley reasons (Individual /
+     Relationships / Context), + single chat exchange + artifact pane
+     (Cypher jSite window, raw results)
   4. Glossary — three canonical definitions, one per column
   5. H2 Under the hood — v9 figures + pipeline + safety
 
@@ -72,8 +74,10 @@ def _have_llm() -> bool:
 # Curated questions — audited Cypher, plain-language framing.
 # --------------------------------------------------------------------------- #
 CURATED = [
+    # ── INDIVIDUAL · understand the dog ────────────────────────────────
     {
-        "q": "Why does Kikoo look normal by breed average, but not by his own baseline?",
+        "cat": "individual",
+        "q": "Kikoo looks normal compared to other Jack Russells, but he seems different lately. Why?",
         "cypher": (
             "MATCH (d:Dog {name:'Kikoo'})-[:HAS_DRIFT]->(x:DriftEvent)-[:DRIFTED_FROM]->(b:Baseline)\n"
             "OPTIONAL MATCH (x)-[:MODULATED_BY]->(c:ContextEvent)\n"
@@ -85,8 +89,10 @@ CURATED = [
                  "other dogs, and by that standard he is fine. This graph compares "
                  "him to himself: his own baseline, and a measured drift away from it."),
     },
+    # ── RELATIONSHIPS · understand interactions ────────────────────────
     {
-        "q": "Why shouldn't Kikoo meet Marlow tomorrow?",
+        "cat": "relationships",
+        "q": "Should Kikoo meet Marlow tomorrow?",
         "cypher": (
             "MATCH (k:Dog {name:'Kikoo'})-[c:COMPATIBLE_WITH]->(m:Dog {name:'Marlow'})\n"
             "MATCH (m)-[:HAS_DRIFT]->(x:DriftEvent)-[:MODULATED_BY]->(ctx:ContextEvent)\n"
@@ -102,18 +108,21 @@ CURATED = [
                  "graph — and invisible to a table of snapshots."),
     },
     {
-        "q": "Which dogs are drifting from their own baseline?",
+        "cat": "individual",
+        "q": "Which of my dogs have been quietly changing lately?",
         "cypher": (
             "MATCH (d:Dog)-[:HAS_DRIFT]->(x:DriftEvent)-[:DRIFTED_FROM]->(:Baseline)\n"
             "RETURN d.name AS dog, d.breed AS breed, x.rate AS drift_rate,\n"
             "       x.severity AS severity, x.detected_on AS detected_on\n"
             "ORDER BY x.rate DESC"
         ),
-        "note": ("The core question a flat tracker cannot ask. Each drift is measured "
-                 "against that dog's own history — no population average involved."),
+        "note": ("'Quietly' is the point — each of these drifts is invisible to a "
+                 "population average. The graph measures every dog against its own "
+                 "baseline: the individual reference frame."),
     },
     {
-        "q": "Which dog needs attention first, and why?",
+        "cat": "individual",
+        "q": "Which dog should I check first today?",
         "cypher": (
             "MATCH (d:Dog)-[:HAS_DRIFT]->(x:DriftEvent)\n"
             "OPTIONAL MATCH (x)-[:MODULATED_BY]->(c:ContextEvent)\n"
@@ -126,8 +135,10 @@ CURATED = [
                  "A drift with a known cause is calm; a drift with no context attached "
                  "earns the first look."),
     },
+    # ── CONTEXT · understand why ───────────────────────────────────────
     {
-        "q": "Is Kikoo's drift explained by context, or unexplained?",
+        "cat": "context",
+        "q": "Is Kikoo changing because of context, or is something else going on?",
         "cypher": (
             "MATCH (d:Dog {name:'Kikoo'})-[:HAS_DRIFT]->(x:DriftEvent)\n"
             "OPTIONAL MATCH (x)-[:MODULATED_BY]->(c:ContextEvent)\n"
@@ -139,7 +150,8 @@ CURATED = [
                  "The MODULATED_BY edge is doing the interpretive work here."),
     },
     {
-        "q": "What changed before the walk recommendation?",
+        "cat": "context",
+        "q": "What changed before Kikoo's new walk recommendation?",
         "cypher": (
             "MATCH (d:Dog {name:'Kikoo'})-[rr:RECOMMENDED_ROUTE]->(r:Route)-[:LOCATED_NEAR]->(l:Location)\n"
             "OPTIONAL MATCH (d)-[:HAS_DRIFT]->(x:DriftEvent)\n"
@@ -153,7 +165,8 @@ CURATED = [
                  "so the answer always ships with its why."),
     },
     {
-        "q": "Which compatibility walk is safest, and why?",
+        "cat": "relationships",
+        "q": "Which walk is safest for Kikoo today, and why?",
         "cypher": (
             "MATCH (:Dog {name:'Kikoo'})-[c:COMPATIBLE_WITH]->(o:Dog)\n"
             "RETURN o.name AS candidate, o.breed AS breed,\n"
@@ -165,18 +178,20 @@ CURATED = [
                  "current state."),
     },
     {
-        "q": "Which dogs are stable — no drift at all?",
+        "cat": "individual",
+        "q": "Which dogs still look like themselves over time?",
         "cypher": (
             "MATCH (d:Dog)\n"
             "WHERE NOT (d)-[:HAS_DRIFT]->(:DriftEvent)\n"
             "RETURN d.name AS dog, d.breed AS breed\n"
             "ORDER BY d.name"
         ),
-        "note": ("Stability is a finding too. These dogs track their own baselines "
-                 "closely — the absence of a drift edge is itself information."),
+        "note": ("Stability is a finding too. These dogs remain closest to their own "
+                 "baseline — the absence of a drift edge is itself information."),
     },
     {
-        "q": "Show Kikoo's baseline profile across all channels.",
+        "cat": "individual",
+        "q": "What does 'normal for Kikoo' actually look like?",
         "cypher": (
             "MATCH (d:Dog {name:'Kikoo'})-[:HAS_BASELINE]->(b:Baseline)\n"
             "RETURN b.established_on AS established_on, b.window_days AS window_days,\n"
@@ -189,8 +204,75 @@ CURATED = [
         "note": ("Five channels, each with a mean and a scale — the Individual "
                  "Cognitive Fingerprint every future reading is compared against."),
     },
+    {
+        "cat": "relationships",
+        "q": "Which dog has the best energy for a play walk today?",
+        "cypher": (
+            "MATCH (a:Dog)-[c:COMPATIBLE_WITH]->(b:Dog)\n"
+            "WHERE c.score >= 0.7\n"
+            "RETURN a.name AS dog, b.name AS partner, c.score AS compatibility,\n"
+            "       c.reason AS why\n"
+            "ORDER BY c.score DESC"
+        ),
+        "note": ("Play energy is not a property of one dog — it lives on the "
+                 "relationship. The best match is the highest-scored edge whose "
+                 "reason describes a matched tempo."),
+    },
+    {
+        "cat": "relationships",
+        "q": "Which dogs should avoid each other today?",
+        "cypher": (
+            "MATCH (a:Dog)-[c:COMPATIBLE_WITH]->(b:Dog)\n"
+            "WHERE c.score < 0.5\n"
+            "RETURN a.name AS dog, b.name AS other, c.score AS compatibility,\n"
+            "       c.previous_score AS score_before, c.reason AS why\n"
+            "ORDER BY c.score ASC"
+        ),
+        "note": ("'Avoid' is not a label — it is a low score with a reason attached. "
+                 "One of these dropped only yesterday, and can recover as the "
+                 "context clears."),
+    },
+    {
+        "cat": "context",
+        "q": "Where should each dog walk today, and why?",
+        "cypher": (
+            "MATCH (d:Dog)-[rr:RECOMMENDED_ROUTE]->(r:Route)-[:LOCATED_NEAR]->(l:Location)\n"
+            "RETURN d.name AS dog, r.name AS route, r.terrain AS terrain,\n"
+            "       r.intensity AS intensity, l.name AS near, rr.reason AS why\n"
+            "ORDER BY d.name"
+        ),
+        "note": ("State-aware recommendation: the same three routes, matched "
+                 "differently per dog — and every match ships with its why, "
+                 "stored on the edge."),
+    },
+    # ── the question every owner asks ──────────────────────────────────
+    {
+        "cat": "signature",
+        "q": "What changed — and should I worry?",
+        "cypher": (
+            "MATCH (d:Dog)-[:HAS_DRIFT]->(x:DriftEvent)\n"
+            "OPTIONAL MATCH (x)-[:MODULATED_BY]->(c:ContextEvent)\n"
+            "WITH d, x, collect(c.type) AS contexts\n"
+            "RETURN d.name AS dog, x.rate AS drift_rate, x.severity AS severity,\n"
+            "       CASE WHEN size(contexts) = 0 THEN 'worth a look — no explanation on file'\n"
+            "            ELSE 'calm — explained by context' END AS should_i_worry,\n"
+            "       contexts AS explained_by\n"
+            "ORDER BY size(contexts) ASC, x.rate DESC"
+        ),
+        "note": ("The Barkley answer, one row per dog: change is measured against "
+                 "the dog's own baseline, then checked for an explanation. Explained "
+                 "change is calm. Unexplained change earns the first look."),
+    },
 ]
 CURATED_BY_Q = {c["q"]: c for c in CURATED}
+FLAGSHIP_Q = CURATED[0]["q"]
+SIGNATURE_Q = next(c["q"] for c in CURATED if c["cat"] == "signature")
+PILLARS = [
+    # key,            tag,                tagline,                    accent
+    ("individual",    "// INDIVIDUAL",    "Understand the dog.",      "#7b9fff"),
+    ("relationships", "// RELATIONSHIPS", "Understand interactions.", "#a884ff"),
+    ("context",       "// CONTEXT",       "Understand why.",          "#3fd6bc"),
+]
 
 
 # --------------------------------------------------------------------------- #
@@ -249,6 +331,11 @@ h2.bk-h2 .bk-acc{font-size:1.04em}
   color:rgba(237,235,228,.78);max-width:56rem;margin:.9rem 0 .2rem}
 .bk-punch{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.22rem;line-height:1.4;
   color:#edebe4;margin:0 0 .7rem}
+
+.bk-pillar{display:flex;align-items:baseline;gap:.6rem;margin:.9rem 0 0}
+.bk-ptag{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.1em}
+.bk-pillar-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:.92rem;
+  color:rgba(237,235,228,.5)}
 .bk-lead b{color:#edebe4;font-weight:600}
 
 .bk-chain{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem .3rem;margin:1rem 0 .4rem}
@@ -417,38 +504,61 @@ st.markdown(
 db_ok = _have_db()
 pending: str | None = None
 
+PILL_KEYS = ["qp_signature"] + [f"qp_{key}" for key, _, _, _ in PILLARS]
+
+
+def _on_pick(changed_key: str) -> None:
+    # Callbacks run before any widget is instantiated, so clearing the other
+    # groups' selections here is legal — one highlighted chip across all groups.
+    val = st.session_state.get(changed_key)
+    if val:
+        st.session_state["pending_q"] = val
+        for k in PILL_KEYS:
+            if k != changed_key:
+                st.session_state[k] = None
+
+
 # First visit: the flagship question asks itself.
 if "booted" not in st.session_state:
     st.session_state["booted"] = True
     if db_ok:
-        pending = CURATED[0]["q"]
+        st.session_state["pending_q"] = FLAGSHIP_Q
+        st.session_state["qp_individual"] = FLAGSHIP_Q
 
 col_chat, col_art = st.columns([1.35, 1], gap="large")
 
 with col_chat:
-    # Curated questions as chips — every one is an audited query. No free-text
-    # field: a box that can't answer arbitrary questions only frustrates.
-    # Stable key: rotating the key desyncs the widget the user sees from the
-    # one the script reads, which swallows every other click. The active chip
-    # stays highlighted instead — it marks the question on screen.
+    # Human questions, grouped the way Barkley reasons — Individual,
+    # Relationships, Context — plus the one every owner actually asks.
+    # No free-text field: curated, audited questions only.
     if hasattr(st, "pills"):
-        picked = st.pills(
-            "questions",
-            options=[c["q"] for c in CURATED],
-            selection_mode="single",
-            default=CURATED[0]["q"] if db_ok else None,
-            key="qpills",
-            label_visibility="collapsed",
+        st.markdown(
+            '<div class="bk-pillar"><span class="bk-ptag" style="color:#c97bff">'
+            '// THE QUESTION EVERY OWNER ASKS</span></div>',
+            unsafe_allow_html=True,
         )
-        if picked != st.session_state.get("last_pick"):
-            st.session_state["last_pick"] = picked
-            if picked:
-                pending = picked
+        st.pills("signature", options=[SIGNATURE_Q], selection_mode="single",
+                 key="qp_signature", on_change=_on_pick, args=("qp_signature",),
+                 label_visibility="collapsed")
+        for key, tag, sub, color in PILLARS:
+            st.markdown(
+                f'<div class="bk-pillar"><span class="bk-ptag" style="color:{color}">{tag}</span>'
+                f'<span class="bk-pillar-sub">{sub}</span></div>',
+                unsafe_allow_html=True,
+            )
+            st.pills(key, options=[c["q"] for c in CURATED if c["cat"] == key],
+                     selection_mode="single", key=f"qp_{key}",
+                     on_change=_on_pick, args=(f"qp_{key}",),
+                     label_visibility="collapsed")
     else:
         sel = st.selectbox("questions", ["—"] + [c["q"] for c in CURATED],
                            label_visibility="collapsed")
         if sel != "—" and st.button("Run", type="primary"):
             pending = sel
+
+    picked_pending = st.session_state.pop("pending_q", None)
+    if picked_pending:
+        pending = picked_pending
 
     # ---- handle the pending question: ONE exchange, replaced each time ----
     if pending:
