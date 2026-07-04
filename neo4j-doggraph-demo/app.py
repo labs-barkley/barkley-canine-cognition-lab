@@ -401,18 +401,22 @@ col_chat, col_art = st.columns([1.35, 1], gap="large")
 with col_chat:
     # Curated questions as chips — every one is an audited query. No free-text
     # field: a box that can't answer arbitrary questions only frustrates.
-    st.session_state.setdefault("pill_gen", 0)
+    # Stable key: rotating the key desyncs the widget the user sees from the
+    # one the script reads, which swallows every other click. The active chip
+    # stays highlighted instead — it marks the question on screen.
     if hasattr(st, "pills"):
         picked = st.pills(
             "questions",
             options=[c["q"] for c in CURATED],
             selection_mode="single",
-            key=f"pills_{st.session_state['pill_gen']}",
+            default=CURATED[0]["q"] if db_ok else None,
+            key="qpills",
             label_visibility="collapsed",
         )
-        if picked:
-            pending = picked
-            st.session_state["pill_gen"] += 1   # reset chips on next run
+        if picked != st.session_state.get("last_pick"):
+            st.session_state["last_pick"] = picked
+            if picked:
+                pending = picked
     else:
         sel = st.selectbox("questions", ["—"] + [c["q"] for c in CURATED],
                            label_visibility="collapsed")
