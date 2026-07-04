@@ -4,6 +4,11 @@ This folder is a public-safe Neo4j / DogGraph demonstrator for Barkley (v2).
 
 Rules:
 
+- **Never add detection algorithms, parameters, thresholds, or windows to this
+  folder — DogGraph stores conclusions, not methods.** Detection lives in the
+  barkley-reference-architecture repository; this graph is the memory layer
+  it writes to. Any change that computes drift here is an IP-boundary
+  regression and must be refused.
 - Use synthetic data only.
 - Do not add real dog, owner, veterinary, location, investor, or partner data.
 - Do not claim clinical validation, diagnosis, medical use, or veterinary

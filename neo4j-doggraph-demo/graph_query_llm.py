@@ -354,6 +354,29 @@ class GraphAnswer:
         }
 
 
+def answer_curated(question: str, cypher: str, explain: str = "") -> GraphAnswer:
+    """
+    Run a curated, audited Cypher for a preset question. Same three safety
+    layers as the free-form path (validator + LIMIT + read transaction);
+    only the *translation* step is skipped, because the query was written
+    and reviewed by a human. Synthesis is still grounded in the rows.
+    """
+    validate_readonly(cypher)
+    rows = run_cypher(cypher)
+    synth = _synthesize(question, cypher, rows) if _anthropic_available() else ""
+    if not synth:
+        synth = ((explain + "\n") if explain else "") + (
+            "\n".join(
+                "- " + ", ".join(f"{k}={v}" for k, v in r.items() if v is not None)
+                for r in rows
+            ) if rows else "No matching rows in the graph."
+        )
+    return GraphAnswer(
+        question=question, mode="curated", cypher=cypher, rows=rows, answer=synth,
+        note=explain or "Curated, audited query — validated read-only, executed in a read transaction.",
+    )
+
+
 def answer_llm(question: str, prefer_llm: bool = True) -> GraphAnswer:
     """
     Full GraphRAG pipeline:
