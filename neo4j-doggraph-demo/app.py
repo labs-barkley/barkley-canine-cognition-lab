@@ -1,27 +1,28 @@
 """
-Barkley DogGraph — Streamlit app (v3 · v9 brand)
-================================================
-The behavioral memory layer, made legible in ten seconds.
+Barkley DogGraph — Streamlit app (v4 · chat + artifact pane)
+============================================================
+The behavioral memory layer, presented the way a VC already knows:
+a chat on the left (question at the bottom, answer typing itself out),
+and an artifact pane on the right (the generated Cypher in a jSite window,
+raw results beneath). Familiar first; novel second.
 
-Page architecture (deliberate — a VC must understand before scrolling):
-  1. Header: halo · wordmark · CTA → getbarkley.com
-  2. The claim: DogGraph stores, connects, explains — it does not detect
-  3. The difference, in ten seconds (breed average vs own baseline)
-  4. Ask: a dropdown of curated, audited questions (auto-runs — no empty box
-     that pretends to answer anything you type)
-  5. Result: grounded answer · Cypher in a jSite window · raw rows,
-     with "what you're seeing" + glossary on the right
-  6. Free-form GraphRAG for CTOs (expander, rate-limited)
-  7. Under the hood: schema + pipeline + safety, at the end
+Page architecture:
+  1. Header: halo · wordmark · CTA → getbarkley.com · the claim + chain
+  2. H2 The difference, in ten seconds — card | card | paragraph (thirds)
+  3. H2 Run the graph — chat (suggested questions as chips, free-form input)
+     + artifact pane (Cypher jSite window, raw results)
+  4. Glossary — three canonical definitions, one per column
+  5. H2 Under the hood — v9 figures + pipeline + safety
 
-Secrets: NEO4J_URI / NEO4J_USER / NEO4J_PASSWORD (+ ANTHROPIC_API_KEY) via
-st.secrets or env. Synthetic data · not a diagnostic tool · patents filed.
+Secrets via st.secrets or env. Synthetic data · not a diagnostic tool ·
+patent applications filed.
 """
 from __future__ import annotations
 
 import html
 import os
 import re
+import time
 
 import streamlit as st
 
@@ -36,7 +37,6 @@ st.set_page_config(
 if hasattr(st, "logo"):
     st.logo(HALO_URL, link="https://getbarkley.com")
 
-# Free-form questions per session (public demo wired to a real API key).
 MAX_FREEFORM_PER_SESSION = 15
 
 
@@ -68,8 +68,7 @@ def _have_llm() -> bool:
 
 
 # --------------------------------------------------------------------------- #
-# Curated questions — audited Cypher, plain-language framing. The dropdown is
-# the primary interface on purpose: every question always works.
+# Curated questions — audited Cypher, plain-language framing.
 # --------------------------------------------------------------------------- #
 CURATED = [
     {
@@ -120,7 +119,7 @@ CURATED = [
             "       c.type AS context, c.description AS context_detail"
         ),
         "note": ("Context is the difference between an alarm and an explanation. "
-                 "The edge MODULATED_BY is doing the interpretive work here."),
+                 "The MODULATED_BY edge is doing the interpretive work here."),
     },
     {
         "q": "What changed before the walk recommendation?",
@@ -198,14 +197,13 @@ def _cached_freeform(question: str) -> dict:
 
 
 # --------------------------------------------------------------------------- #
-# v9 CSS + HTML components
+# v9 CSS
 # --------------------------------------------------------------------------- #
 V9_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-html, body, [class*="css"], .stMarkdown, p, li { font-family: 'Inter','Helvetica Neue',sans-serif; }
-h1,h2,h3 { font-family:'Inter Tight','Helvetica Neue',sans-serif !important; letter-spacing:-.03em; }
+html, body, [class*="css"], .stMarkdown, p, li { font-family:'Inter','Helvetica Neue',sans-serif; }
 
 .bk-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;
   padding:.2rem 0 1.1rem;border-bottom:1px solid rgba(237,235,228,.08);margin-bottom:1.6rem}
@@ -224,8 +222,13 @@ h1,h2,h3 { font-family:'Inter Tight','Helvetica Neue',sans-serif !important; let
   text-transform:uppercase;color:rgba(237,235,228,.42);margin:.2rem 0 1rem}
 .bk-h1{font-family:'Inter Tight',sans-serif;font-weight:500;font-size:clamp(1.9rem,4.2vw,3rem);
   line-height:1.05;letter-spacing:-.045em;color:#edebe4;margin:0 0 1rem}
-.bk-acc{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:1.05em;
-  background:linear-gradient(115deg,#2ee0ff 0%,#7b9fff 45%,#c97bff 100%);
+h2.bk-h2{font-family:'Inter Tight',sans-serif !important;font-weight:500 !important;
+  font-size:clamp(1.5rem,2.6vw,2.1rem) !important;letter-spacing:-.035em !important;
+  color:#edebe4 !important;margin:2.6rem 0 1.2rem !important;padding-top:1.6rem !important;
+  border-top:1px solid rgba(237,235,228,.07)}
+h2.bk-h2 .bk-acc{font-size:1.04em}
+.bk-acc{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;
+  background:linear-gradient(120deg,#7b9fff,#c97bff);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .bk-lead{font-size:1.02rem;line-height:1.65;color:rgba(237,235,228,.64);max-width:56rem;margin:0 0 .6rem}
 .bk-lead b{color:#edebe4;font-weight:600}
@@ -236,46 +239,53 @@ h1,h2,h3 { font-family:'Inter Tight','Helvetica Neue',sans-serif !important; let
   border:1px solid rgba(237,235,228,.1);white-space:nowrap}
 .bk-edge{width:22px;height:1px;background:linear-gradient(90deg,rgba(123,159,255,.5),rgba(201,123,255,.5))}
 
-.bk-diff{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0 .9rem}
-@media(max-width:800px){.bk-diff{grid-template-columns:1fr}}
+.bk-thirds{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:.4rem 0 1rem}
+@media(max-width:900px){.bk-thirds{grid-template-columns:1fr}}
 .bk-card{border:1px solid rgba(237,235,228,.09);border-radius:16px;padding:1.3rem 1.4rem;
-  background:rgba(255,255,255,.014)}
+  background:rgba(255,255,255,.014);height:100%;box-sizing:border-box}
 .bk-card .tag{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.1em;
   text-transform:uppercase;margin-bottom:.6rem}
 .bk-card h4{font-family:'Inter Tight',sans-serif;font-weight:600;font-size:1.12rem;
   letter-spacing:-.02em;color:#edebe4;margin:0 0 .45rem}
 .bk-card p{font-size:.93rem;line-height:1.6;color:rgba(237,235,228,.64);margin:0}
 .bk-verdict{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.05rem}
-.bk-same{font-size:1.02rem;color:rgba(237,235,228,.64);line-height:1.65;max-width:56rem}
+.bk-same{display:flex;flex-direction:column;justify-content:center;height:100%;box-sizing:border-box;
+  font-size:.98rem;color:rgba(237,235,228,.64);line-height:1.65;padding:.4rem .2rem}
 .bk-same b{color:#edebe4}
 
-.bk-sec{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.2em;
-  text-transform:uppercase;color:rgba(237,235,228,.42);border-top:1px solid rgba(237,235,228,.07);
-  padding-top:1.3rem;margin:2rem 0 .8rem}
-
-.win{border:1px solid rgba(237,235,228,.1);border-radius:14px;overflow:hidden;
-  background:#0b0d12;margin:.4rem 0 .8rem;box-shadow:0 30px 70px -40px rgba(0,0,0,.9)}
-.win-bar{display:flex;align-items:center;gap:.7rem;padding:.5rem .9rem;background:#090b0f;
+/* jSite window — values from getbarkley v3 (the reference implementation) */
+.win{border:1px solid rgba(237,235,228,.09);border-radius:14px;overflow:hidden;
+  background:#0c0e13;margin:.4rem 0 .9rem;box-shadow:0 30px 80px -45px rgba(0,0,0,.95)}
+.win *{margin:0;box-sizing:border-box}
+.win-bar{display:flex;align-items:center;gap:.8rem;padding:.7rem 1rem;background:#0e1116;
   border-bottom:1px solid rgba(237,235,228,.05)}
-.win-dots{display:flex;gap:5px}
-.win-dots i{width:10px;height:10px;border-radius:50%;display:block}
-.win-title{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:rgba(237,235,228,.42);margin:0 auto;transform:translateX(-20px)}
-.win-code{font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.75;color:#c6ccd6;
-  padding:.9rem 1.1rem;margin:0;white-space:pre-wrap;word-break:break-word}
-.win-code .k{color:#7b9fff}.win-code .s{color:#3fd6bc}.win-code .t{color:#c97bff}.win-code .p{color:#2ee0ff}
-.win-status{display:flex;gap:1rem;padding:.4rem .9rem;background:#090b0f;border-top:1px solid rgba(237,235,228,.05)}
-.win-status span{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:rgba(237,235,228,.42)}
+.win-dots{display:flex;gap:6px}
+.win-dots i{width:11px;height:11px;border-radius:50%;display:block}
+.win-title{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:rgba(237,235,228,.42);
+  margin:0 auto;transform:translateX(-24px)}
+.win-code{font-family:'JetBrains Mono',monospace !important;font-size:.78rem !important;
+  line-height:1.7 !important;color:#c6ccd6 !important;background:#0c0e13 !important;
+  padding:.9rem 1.2rem !important;white-space:pre-wrap;word-break:break-word;
+  border:none !important;display:block}
+.win-code .k{color:#7b9fff}.win-code .s{color:#3fd6bc}.win-code .t{color:#c97bff}
+.win-status{display:flex;gap:1.1rem;padding:.45rem 1rem;background:#0e1116;
+  border-top:1px solid rgba(237,235,228,.05);flex-wrap:wrap}
+.win-status span{font-family:'JetBrains Mono',monospace;font-size:.64rem;color:rgba(237,235,228,.42)}
 .win-status .ok{color:#3fd6bc}.win-status .br{color:#7b9fff}
 
-.bk-note{border-left:2px solid rgba(201,123,255,.5);padding:.15rem 0 .15rem .9rem;margin:.2rem 0 1rem}
-.bk-note p{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.02rem;
-  line-height:1.55;color:rgba(237,235,228,.78);margin:0}
-.bk-gloss{font-size:.86rem;line-height:1.6;color:rgba(237,235,228,.56)}
-.bk-gloss b{color:#edebe4;font-weight:600}
+.bk-gloss-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:.4rem 0 .6rem}
+@media(max-width:900px){.bk-gloss-grid{grid-template-columns:1fr}}
+.bk-gloss{border-top:1px solid rgba(237,235,228,.12);padding-top:.9rem;
+  font-size:.88rem;line-height:1.6;color:rgba(237,235,228,.56)}
+.bk-gloss b{display:block;color:#edebe4;font-weight:600;font-family:'Inter Tight',sans-serif;
+  font-size:1rem;margin-bottom:.35rem}
+.bk-gloss-link{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:rgba(237,235,228,.42);margin:.2rem 0 0}
+.bk-gloss-link a{color:rgba(123,159,255,.8);text-decoration:none}
 
-div.stButton>button[kind="primary"]{background:linear-gradient(120deg,#7b9fff,#c97bff);
-  border:none;border-radius:999px;font-family:'Inter Tight',sans-serif;font-weight:600}
 div.stButton>button{border-radius:999px;font-family:'Inter Tight',sans-serif}
+div.stButton>button[kind="primary"]{background:linear-gradient(120deg,#7b9fff,#c97bff);border:none;font-weight:600}
+div[data-testid="stChatMessage"]{background:transparent}
+
 .bk-foot{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.66rem;
   letter-spacing:.06em;color:rgba(237,235,228,.3);margin-top:2.4rem}
 .bk-foot a{color:rgba(123,159,255,.7);text-decoration:none}
@@ -285,7 +295,6 @@ st.markdown(V9_CSS, unsafe_allow_html=True)
 
 
 def cypher_html(code: str) -> str:
-    """Escape + minimally highlight Cypher for the jSite window."""
     c = html.escape(code, quote=False)
     c = re.sub(r"('[^']*')", r'<span class="s">\1</span>', c)
     c = re.sub(r"(:`?[A-Za-z_]+`?)(?=[\s){\]])", r'<span class="t">\1</span>', c)
@@ -295,23 +304,27 @@ def cypher_html(code: str) -> str:
     return c
 
 
-def jsite_cypher(code: str, mode: str) -> str:
+def jsite_window(title: str, body_html: str, status_html: str) -> str:
     return (
         '<div class="win">'
         '<div class="win-bar"><span class="win-dots">'
         '<i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>'
-        '</span><span class="win-title">query.cypher — generated & validated</span></div>'
-        f'<pre class="win-code">{cypher_html(code)}</pre>'
-        '<div class="win-status"><span class="br">⎇ read-only</span>'
-        '<span class="ok">✓ validator passed</span>'
-        '<span class="ok">✓ read transaction</span>'
-        f'<span>mode: {html.escape(mode)}</span></div>'
+        f'</span><span class="win-title">{html.escape(title)}</span></div>'
+        f'<div class="win-code">{body_html}</div>'
+        f'<div class="win-status">{status_html}</div>'
         '</div>'
     )
 
 
+def _stream_words(text: str):
+    for w in re.split(r"(\s+)", text):
+        yield w
+        if w.strip():
+            time.sleep(0.012)
+
+
 # --------------------------------------------------------------------------- #
-# 1 · Header
+# 1 · Header + claim
 # --------------------------------------------------------------------------- #
 st.markdown(
     f'''
@@ -341,12 +354,12 @@ st.markdown(
 )
 
 # --------------------------------------------------------------------------- #
-# 2 · The difference, in ten seconds — FIRST, or nothing else makes sense
+# 2 · The difference, in ten seconds — card | card | paragraph (thirds)
 # --------------------------------------------------------------------------- #
 st.markdown(
     '''
-    <div class="bk-sec">01 · The difference, in ten seconds</div>
-    <div class="bk-diff">
+    <h2 class="bk-h2">The difference, <span class="bk-acc">in ten seconds.</span></h2>
+    <div class="bk-thirds">
       <div class="bk-card">
         <div class="tag" style="color:rgba(237,235,228,.42)">// breed average</div>
         <h4>The breed average says: fine.</h4>
@@ -359,167 +372,195 @@ st.markdown(
         <p>Compared to <i>his own</i> history, Kikoo moves less, recovers slower, and
         goes quiet more often. <span class="bk-verdict" style="color:#c97bff">Drift detected — weeks earlier.</span></p>
       </div>
+      <div class="bk-same"><span>Same dog. Same data. <b>Different reference — different
+      conclusion.</b> This graph is the memory that makes the second answer possible:
+      each dog's baseline, its drift, and the context that explains it, stored as
+      relationships you can question.</span></div>
     </div>
-    <p class="bk-same">Same dog. Same data. <b>Different reference — different conclusion.</b>
-    This graph is the memory that makes the second answer possible: each dog's baseline,
-    its drift, and the context that explains it, stored as relationships you can question.</p>
     ''',
     unsafe_allow_html=True,
 )
 
 # --------------------------------------------------------------------------- #
-# 3 · Ask — dropdown of curated questions, auto-runs
+# 3 · Run the graph — chat + artifact pane
 # --------------------------------------------------------------------------- #
-st.markdown('<div class="bk-sec">02 · Ask the graph</div>', unsafe_allow_html=True)
+st.markdown('<h2 class="bk-h2">Run <span class="bk-acc">the graph.</span></h2>', unsafe_allow_html=True)
 
 db_ok, llm_ok = _have_db(), _have_llm()
+chat = st.session_state.setdefault("chat", [])   # [{q, res, note, streamed}]
+pending: str | None = None
 
-question = st.selectbox(
-    "Pick a question — it runs instantly:",
-    options=[c["q"] for c in CURATED],
-    index=0,
-    help="Every question here is a curated, audited graph query — it always works. "
-         "CTO mode: ask your own free-form question further down.",
-)
+# First visit: the flagship question asks itself.
+if "booted" not in st.session_state:
+    st.session_state["booted"] = True
+    if db_ok:
+        pending = CURATED[0]["q"]
 
-if not db_ok:
-    st.error("Neo4j credentials missing — see README / deploy/DEPLOY.md.")
-else:
-    with st.spinner("Querying the graph…"):
-        try:
-            result = _cached_curated(question)
-        except Exception as exc:
-            st.error(f"Error: {exc}")
-            st.stop()
+col_chat, col_art = st.columns([1.35, 1], gap="large")
 
-    col_main, col_side = st.columns([1.9, 1], gap="large")
-
-    with col_main:
-        st.markdown("#### Answer")
-        st.markdown(result["answer"] or "_(no answer synthesized)_")
-        st.markdown(jsite_cypher(result["cypher"], result["mode"]), unsafe_allow_html=True)
-        if result["rows"]:
-            with st.expander(f"Raw results · {len(result['rows'])} row(s)"):
-                st.dataframe(result["rows"], use_container_width=True, hide_index=True)
-        st.caption(
-            "Every number above came out of the graph — the model is only allowed to "
-            "phrase what was retrieved."
+with col_chat:
+    # Suggested questions — chat-style chips (a dropdown fallback if pills
+    # aren't available). Every suggestion is a curated, audited query.
+    st.session_state.setdefault("pill_gen", 0)
+    if hasattr(st, "pills"):
+        picked = st.pills(
+            "Suggested questions — every one always works:",
+            options=[c["q"] for c in CURATED],
+            selection_mode="single",
+            key=f"pills_{st.session_state['pill_gen']}",
         )
+        if picked:
+            pending = picked
+            st.session_state["pill_gen"] += 1   # reset chips on next run
+    else:
+        sel = st.selectbox("Suggested questions:", ["—"] + [c["q"] for c in CURATED])
+        if sel != "—" and st.button("Run", type="primary"):
+            pending = sel
 
-    with col_side:
-        st.markdown(
-            f'<div class="bk-note"><p>{html.escape(CURATED_BY_Q[question]["note"])}</p></div>',
-            unsafe_allow_html=True,
-        )
-        here = os.path.dirname(os.path.abspath(__file__))
-        render = os.path.join(here, "screenshots", "graph_render.png")
-        if os.path.exists(render):
-            st.image(render, caption="Kikoo's neighborhood — the memory being queried",
-                     use_container_width=True)
-        st.markdown(
-            '''
-            <div class="bk-gloss">
-            <b>Individual Baseline</b> — a per-individual longitudinal norm learned from
-            that individual's own history, used as the reference frame for detecting
-            change instead of a population average.<br/><br/>
-            <b>Behavioral Drift</b> — a slow, cumulative divergence of an individual's
-            behavior away from its own baseline — typically invisible to population
-            statistics.<br/><br/>
-            <b>Reference Frame</b> — the comparison standard a model uses to decide
-            whether a behavior is normal; the same data can yield opposite conclusions
-            under different reference frames.<br/><br/>
-            Full canonical glossary → <a href="https://getbarkley.com/llms.txt"
-            style="color:rgba(123,159,255,.8)">getbarkley.com/llms.txt</a>
-            </div>
-            ''',
-            unsafe_allow_html=True,
-        )
+    typed = st.chat_input("…or ask your own (LLM → read-only Cypher)")
+    if typed and typed.strip():
+        pending = typed.strip()
 
-# --------------------------------------------------------------------------- #
-# 4 · Free-form GraphRAG — the CTO path (rate-limited)
-# --------------------------------------------------------------------------- #
-st.markdown('<div class="bk-sec">03 · CTO mode — free-form GraphRAG</div>', unsafe_allow_html=True)
-with st.expander("Ask your own question (LLM → schema-constrained, read-only Cypher)"):
-    st.caption(
-        "Your question is translated by an LLM constrained to the DogGraph schema. "
-        "The emitted Cypher is validated (writes and CALL refused), capped with a "
-        "LIMIT, and executed in a server-enforced read transaction. Out-of-schema "
-        "questions get a graceful refusal — by design, this box does not pretend "
-        "to know things the graph doesn't."
-    )
-    ff_q = st.text_input("Free-form question:", placeholder="e.g. Which dog has the highest unexplained drift?")
-    ff_go = st.button("Ask the graph", type="primary")
-    if ff_go and ff_q.strip():
+    # ---- handle the pending question ----
+    if pending:
         if not db_ok:
-            st.error("Neo4j credentials missing.")
+            st.error("Neo4j credentials missing — see deploy/DEPLOY.md.")
+        elif pending in CURATED_BY_Q:
+            res = _cached_curated(pending)
+            chat.append({"q": pending, "res": res,
+                         "note": CURATED_BY_Q[pending]["note"], "streamed": False})
         elif not llm_ok:
-            st.info("ANTHROPIC_API_KEY missing — free-form mode needs the LLM translator.")
+            st.info("Free-form questions need the LLM translator (ANTHROPIC_API_KEY).")
         elif st.session_state.get("ff_count", 0) >= MAX_FREEFORM_PER_SESSION:
             st.warning(
-                f"You've reached {MAX_FREEFORM_PER_SESSION} free-form questions this "
-                "session — thanks for stress-testing the GraphRAG layer! Refresh for a "
-                "new session, or reach out at labs@getbarkley.com."
+                f"{MAX_FREEFORM_PER_SESSION} free-form questions reached for this session — "
+                "thanks for stress-testing the GraphRAG layer! Refresh for a new session, "
+                "or write to labs@getbarkley.com."
             )
         else:
             st.session_state["ff_count"] = st.session_state.get("ff_count", 0) + 1
             with st.spinner("Translating → validating → querying → grounding…"):
                 try:
-                    ff = _cached_freeform(ff_q.strip())
+                    res = _cached_freeform(pending)
+                    chat.append({"q": pending, "res": res,
+                                 "note": res.get("note", ""), "streamed": False})
                 except Exception as exc:
                     st.error(f"Error: {exc}")
-                    st.stop()
-            st.markdown("#### Answer")
-            st.markdown(ff["answer"] or f"_{ff['note'] or 'No answer.'}_")
-            if ff["cypher"]:
-                st.markdown(jsite_cypher(ff["cypher"], ff["mode"]), unsafe_allow_html=True)
-            if ff["rows"]:
-                with st.expander(f"Raw results · {len(ff['rows'])} row(s)"):
-                    st.dataframe(ff["rows"], use_container_width=True, hide_index=True)
+
+    # ---- render the conversation (answer types itself out once) ----
+    for i, turn in enumerate(chat[-6:]):
+        with st.chat_message("user"):
+            st.markdown(turn["q"])
+        with st.chat_message("assistant", avatar=HALO_URL):
+            answer = turn["res"]["answer"] or f"_{turn['res'].get('note') or 'No answer.'}_"
+            is_last = (i == len(chat[-6:]) - 1)
+            if is_last and not turn.get("streamed"):
+                st.write_stream(_stream_words(answer))
+                turn["streamed"] = True
+            else:
+                st.markdown(answer)
+            if turn.get("note") and turn["res"].get("mode") == "curated":
+                st.caption(turn["note"])
+
+with col_art:
+    if chat:
+        last = chat[-1]["res"]
+        if last.get("cypher"):
+            status = (
+                '<span class="br">⎇ read-only</span>'
+                '<span class="ok">✓ validator</span>'
+                '<span class="ok">✓ read transaction</span>'
+                f'<span>mode: {html.escape(str(last.get("mode", "")))}</span>'
+            )
+            st.markdown(
+                jsite_window("query.cypher — generated & validated",
+                             cypher_html(last["cypher"]), status),
+                unsafe_allow_html=True,
+            )
+        if last.get("rows"):
+            st.markdown(
+                f'<div class="bk-kicker" style="margin:.2rem 0 .4rem">Raw results · {len(last["rows"])} row(s)</div>',
+                unsafe_allow_html=True,
+            )
+            st.dataframe(last["rows"], use_container_width=True, hide_index=True)
+        st.caption(
+            "Every number came out of the graph — the model is only allowed to phrase "
+            "what was retrieved."
+        )
 
 # --------------------------------------------------------------------------- #
-# 5 · Under the hood — schema, pipeline, safety (at the end, as it should be)
+# 4 · Glossary — one definition per column
 # --------------------------------------------------------------------------- #
-st.markdown('<div class="bk-sec">04 · Under the hood</div>', unsafe_allow_html=True)
-c1, c2 = st.columns([1.15, 1], gap="large")
+st.markdown(
+    '''
+    <div class="bk-gloss-grid">
+      <div class="bk-gloss"><b>Individual Baseline</b>
+        A per-individual longitudinal norm learned from that individual's own history,
+        used as the reference frame for detecting change instead of a population average.</div>
+      <div class="bk-gloss"><b>Behavioral Drift</b>
+        A slow, cumulative divergence of an individual's behavior away from its own
+        baseline — typically invisible to population statistics.</div>
+      <div class="bk-gloss"><b>Reference Frame</b>
+        The comparison standard a model uses to decide whether a behavior is normal;
+        the same data can yield opposite conclusions under different reference frames.</div>
+    </div>
+    <p class="bk-gloss-link">Full canonical glossary →
+      <a href="https://getbarkley.com/llms.txt" target="_blank">getbarkley.com/llms.txt</a></p>
+    ''',
+    unsafe_allow_html=True,
+)
+
+# --------------------------------------------------------------------------- #
+# 5 · Under the hood — figures + pipeline + safety, at the end
+# --------------------------------------------------------------------------- #
+st.markdown('<h2 class="bk-h2">Under <span class="bk-acc">the hood.</span></h2>', unsafe_allow_html=True)
+here = os.path.dirname(os.path.abspath(__file__))
+c1, c2 = st.columns(2, gap="large")
 with c1:
-    here = os.path.dirname(os.path.abspath(__file__))
-    schema_img = os.path.join(here, "screenshots", "doggraph_schema.png")
-    if os.path.exists(schema_img):
-        st.image(schema_img, caption="The DogGraph schema — the relationships are the product",
+    p = os.path.join(here, "screenshots", "doggraph_schema.png")
+    if os.path.exists(p):
+        st.image(p, caption="The DogGraph schema — the relationships are the product",
                  use_container_width=True)
 with c2:
+    p = os.path.join(here, "screenshots", "graph_render.png")
+    if os.path.exists(p):
+        st.image(p, caption="Kikoo's neighborhood — the memory being queried",
+                 use_container_width=True)
+
+c3, c4 = st.columns([2, 3], gap="large")
+with c3:
     st.markdown(
-        jsite_cypher(
-            "question\n"
-            "  → LLM (schema-constrained, read-only rule, OUT_OF_SCOPE escape)\n"
-            "  → Cypher\n"
-            "  → validator (writes + CALL refused) · LIMIT enforced\n"
-            "  → Neo4j, read transaction   ← retrieval = graph traversal\n"
-            "  → rows\n"
-            "  → LLM ('ground the answer strictly in these rows')\n"
-            "  → answer",
-            "graphrag · strict sense",
+        jsite_window(
+            "pipeline — graphrag, strict sense",
+            html.escape(
+                "question\n"
+                "  → LLM (schema-constrained, read-only rule)\n"
+                "  → Cypher\n"
+                "  → validator (writes + CALL refused)\n"
+                "  → LIMIT enforced\n"
+                "  → Neo4j, read transaction\n"
+                "  → rows\n"
+                "  → LLM ('ground strictly in these rows')\n"
+                "  → answer",
+                quote=False),
+            '<span class="br">⎇ read-only</span><span class="ok">✓ three safety layers</span>',
         ),
         unsafe_allow_html=True,
     )
+with c4:
     st.markdown(
         "**Honest by construction.** The LLM is an interface, not a reasoning engine: "
         "retrieval is the graph traversal, generation is grounded in the retrieved rows, "
-        "and no write can ever reach the database — prompt rule, keyword validator, and "
-        "a server-enforced read transaction, in depth. Drift **detection** happens in the "
+        "and no write can ever reach the database — prompt rule, keyword validator, and a "
+        "server-enforced read transaction, in depth. Drift **detection** happens in the "
         "[Barkley Reference Architecture](https://github.com/labs-barkley/barkley-reference-architecture); "
-        "DogGraph is the behavioral memory it writes to."
-    )
-    st.markdown(
+        "DogGraph is the behavioral memory it writes to.\n\n"
         "- Repo: [`neo4j-doggraph-demo`](https://github.com/labs-barkley/barkley-canine-cognition-lab/tree/main/neo4j-doggraph-demo)\n"
         "- Drift demo: [drift-explorer.getbarkley.com](https://drift-explorer.getbarkley.com)\n"
         "- Dataset: [synthetic-doggraph-sample](https://huggingface.co/datasets/labs-barkley/synthetic-doggraph-sample)\n"
         "- ORCID: [0009-0004-6031-659X](https://orcid.org/0009-0004-6031-659X)"
     )
 
-# --------------------------------------------------------------------------- #
-# Footer
-# --------------------------------------------------------------------------- #
 st.markdown(
     '<div class="bk-foot">© 2026 Barkley AI · synthetic data · patent applications filed · '
     'not a diagnostic tool · <a href="https://getbarkley.com" target="_blank">getbarkley.com</a></div>',
